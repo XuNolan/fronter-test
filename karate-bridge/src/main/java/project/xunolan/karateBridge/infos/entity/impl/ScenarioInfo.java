@@ -1,5 +1,6 @@
 package project.xunolan.karateBridge.infos.entity.impl;
 
+import com.intuit.karate.core.Feature;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,5 +20,5 @@ import java.util.List;
 public class ScenarioInfo implements Serializable {
     String ScenarioId;
     String scenarioName;
-    List<StepInfo> steps = new ArrayList<>();
+    List<StepInfo> steps;
 }

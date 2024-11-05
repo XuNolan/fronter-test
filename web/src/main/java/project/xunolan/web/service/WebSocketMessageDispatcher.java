@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import project.xunolan.karateBridge.infos.entity.SendEntity;
-import project.xunolan.karateBridge.infos.service.ConstructMessageService;
 import project.xunolan.karateBridge.infos.service.FeatureService;
 import project.xunolan.web.entity.RecvContentType;
 import project.xunolan.web.entity.RecvEntity;
@@ -24,8 +23,6 @@ public class WebSocketMessageDispatcher {
     @Autowired
     public FeatureService featureService;
 
-    @Autowired
-    public ConstructMessageService constructMessageService;
 
     public void OnRecv(String message) {
         RecvEntity recvEntity = JSON.parseObject(message, RecvEntity.class);
@@ -33,11 +30,12 @@ public class WebSocketMessageDispatcher {
         recvMsgBase.processMsg();
     }
 
-    public void OnSend(SendEntity sendInfoBase) {
+    public void OnSend(String type, String content) {
         try {
-            webSocketServer.sendMessage(JSON.toJSONString(sendInfoBase));
+            SendEntity sendEntity = SendEntity.builder().type(type).content(content).build();
+            webSocketServer.sendMessage(JSON.toJSONString(sendEntity));
         } catch (IOException e) {
-            log.error("send message error ,message info: {}, error info :{} ",sendInfoBase.toString(), e.getMessage());
+            log.error("send message error ,type : {} , message content: {}, error info :{} ",type, content, e.getMessage());
         }
     }
 }
