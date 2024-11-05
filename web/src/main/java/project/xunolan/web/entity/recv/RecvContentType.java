@@ -1,13 +1,13 @@
-package project.xunolan.web.entity;
+package project.xunolan.web.entity.recv;
 
 import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import project.xunolan.web.entity.impl.ProcessScenarioReplay;
-import project.xunolan.web.entity.impl.ProcessScenarioStart;
-import project.xunolan.web.entity.impl.ProcessScenarioStop;
-import project.xunolan.web.entity.impl.RequestFeature;
+import project.xunolan.web.entity.recv.impl.ProcessScenarioReplay;
+import project.xunolan.web.entity.recv.impl.ProcessScenarioStart;
+import project.xunolan.web.entity.recv.impl.ProcessScenarioStop;
+import project.xunolan.web.entity.recv.impl.RequestFeature;
 
 
 @ToString

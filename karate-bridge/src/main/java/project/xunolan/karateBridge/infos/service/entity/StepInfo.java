@@ -1,4 +1,4 @@
-package project.xunolan.karateBridge.infos.entity.impl;
+package project.xunolan.karateBridge.infos.service.entity;
 
 import lombok.*;
 import lombok.experimental.Accessors;

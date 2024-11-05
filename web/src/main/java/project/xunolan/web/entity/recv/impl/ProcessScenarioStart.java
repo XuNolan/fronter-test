@@ -1,11 +1,10 @@
-package project.xunolan.web.entity.impl;
+package project.xunolan.web.entity.recv.impl;
 
-import com.intuit.karate.core.Feature;
 import project.xunolan.karateBridge.actions.service.ProcessService;
-import project.xunolan.karateBridge.infos.entity.impl.FeatureInfo;
+import project.xunolan.karateBridge.infos.service.entity.FeatureInfo;
 import project.xunolan.karateBridge.infos.service.FeatureService;
-import project.xunolan.karateBridge.infos.utils.BeanUtils;
-import project.xunolan.web.entity.RecvMsgBase;
+import project.xunolan.web.utils.BeanUtils;
+import project.xunolan.web.entity.recv.RecvMsgBase;
 
 public class ProcessScenarioStart extends RecvMsgBase {
     //执行单位为feature。

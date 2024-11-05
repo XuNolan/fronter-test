@@ -1,7 +1,5 @@
-package project.xunolan.web.entity;
+package project.xunolan.web.entity.recv;
 
-
-import com.alibaba.fastjson.JSON;
 
 public abstract class RecvMsgBase {
 

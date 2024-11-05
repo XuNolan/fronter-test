@@ -5,9 +5,10 @@ import com.intuit.karate.core.Scenario;
 import com.intuit.karate.core.Step;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import project.xunolan.karateBridge.infos.entity.impl.ScenarioInfo;
-import project.xunolan.karateBridge.infos.entity.impl.StepInfo;
-import project.xunolan.karateBridge.infos.entity.impl.FeatureInfo;
+import project.xunolan.karateBridge.infos.service.entity.FeatureInfo;
+import project.xunolan.karateBridge.infos.service.entity.ScenarioInfo;
+import project.xunolan.karateBridge.infos.service.entity.StepInfo;
+
 
 import java.io.File;
 import java.util.*;

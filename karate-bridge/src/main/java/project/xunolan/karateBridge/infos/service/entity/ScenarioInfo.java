@@ -1,6 +1,5 @@
-package project.xunolan.karateBridge.infos.entity.impl;
+package project.xunolan.karateBridge.infos.service.entity;
 
-import com.intuit.karate.core.Feature;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,9 +8,8 @@ import lombok.experimental.Accessors;
 
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
-
+//对info的增强。
 @Getter
 @Setter
 @ToString

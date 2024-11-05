@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import project.xunolan.karateBridge.infos.entity.SendEntity;
+import project.xunolan.web.entity.send.entity.SendEntity;
 import project.xunolan.karateBridge.infos.service.FeatureService;
-import project.xunolan.web.entity.RecvContentType;
-import project.xunolan.web.entity.RecvEntity;
-import project.xunolan.web.entity.RecvMsgBase;
+import project.xunolan.web.entity.recv.RecvContentType;
+import project.xunolan.web.entity.recv.RecvEntity;
+import project.xunolan.web.entity.recv.RecvMsgBase;
 import project.xunolan.web.server.WebSocketServer;
 
 import java.io.IOException;

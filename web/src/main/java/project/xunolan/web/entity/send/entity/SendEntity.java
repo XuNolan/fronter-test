@@ -1,4 +1,4 @@
-package project.xunolan.karateBridge.infos.entity;
+package project.xunolan.web.entity.send.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

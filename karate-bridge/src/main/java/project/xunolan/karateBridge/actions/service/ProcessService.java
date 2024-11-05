@@ -1,18 +1,13 @@
 package project.xunolan.karateBridge.actions.service;
 
-import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
-import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import project.xunolan.karateBridge.actions.service.hooks.HookService;
-import project.xunolan.karateBridge.actions.service.hooks.hookImpl.StepControlRuntimeHook;
-import project.xunolan.karateBridge.infos.entity.impl.FeatureInfo;
+import project.xunolan.karateBridge.infos.service.entity.FeatureInfo;
 
-import java.util.List;
 
 @Service
 public class ProcessService {

@@ -1,9 +1,9 @@
-package project.xunolan.karateBridge.infos.entity;
+package project.xunolan.web.entity.send.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import project.xunolan.karateBridge.infos.entity.impl.FeatureInfo;
+import project.xunolan.web.entity.send.entity.impl.FeatureInfoReply;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 @Getter
 @AllArgsConstructor
 public enum SendMessageType {
-    FeatureInfoMsg(FeatureInfo.class, "featureInfos"),
+    FeatureInfoMsg(FeatureInfoReply.class, "featureInfos"),
     ExecuteInfoMsg(null, "executeInfos"), //hasn't complete
 
     ;

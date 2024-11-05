@@ -1,4 +1,4 @@
-package project.xunolan.web.entity;
+package project.xunolan.web.entity.recv;
 
 import lombok.Getter;
 import lombok.Setter;

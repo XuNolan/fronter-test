@@ -1,6 +1,6 @@
-package project.xunolan.web.entity.impl;
+package project.xunolan.web.entity.recv.impl;
 
-import project.xunolan.web.entity.RecvMsgBase;
+import project.xunolan.web.entity.recv.RecvMsgBase;
 
 public class ProcessScenarioReplay extends RecvMsgBase {
     @Override

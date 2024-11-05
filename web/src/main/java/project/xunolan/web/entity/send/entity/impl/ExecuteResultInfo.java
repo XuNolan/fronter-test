@@ -1,4 +1,4 @@
-package project.xunolan.karateBridge.infos.entity.impl;
+package project.xunolan.web.entity.send.entity.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.intuit.karate.core.Result;
@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import project.xunolan.web.entity.send.entity.SendMessageType;
+import project.xunolan.web.service.WebSocketMessageDispatcher;
+import project.xunolan.web.utils.BeanUtils;
 
 import java.sql.Timestamp;
 
@@ -29,7 +32,9 @@ public class ExecuteResultInfo {
                 .build();
     }
 
-    public String constructExecuuteResultInfo(){
-        return JSON.toJSONString(this);
+    public void constructAndSendExecuteResultInfo(){
+        String content = JSON.toJSONString(this);
+        String type = SendMessageType.ExecuteInfoMsg.getMsgTypeStr();
+        BeanUtils.getBean(WebSocketMessageDispatcher.class).OnSend(type, content);
     }
 }
