@@ -3,7 +3,6 @@ package project.xunolan.web.server;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import project.xunolan.karateBridge.infos.service.FeatureService;
 import project.xunolan.web.service.WebSocketMessageDispatcher;
 
 import javax.websocket.*;

@@ -5,6 +5,7 @@ import com.intuit.karate.core.Scenario;
 import com.intuit.karate.core.Step;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import project.xunolan.karateBridge.infos.service.entity.FeatureInfo;
 import project.xunolan.karateBridge.infos.service.entity.ScenarioInfo;
 import project.xunolan.karateBridge.infos.service.entity.StepInfo;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.util.*;
 
 @Slf4j
+@Service
 public class FeatureService {
     private final static String featureDirPath = "src/main/resources/features";
     private static File dir;

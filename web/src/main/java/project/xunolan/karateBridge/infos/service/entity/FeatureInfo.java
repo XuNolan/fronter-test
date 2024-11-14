@@ -1,6 +1,5 @@
 package project.xunolan.karateBridge.infos.service.entity;
 
-import com.alibaba.fastjson.JSON;
 import com.intuit.karate.core.Feature;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +8,6 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import project.xunolan.karateBridge.infos.service.FeatureService;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
