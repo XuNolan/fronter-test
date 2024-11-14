@@ -6,11 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.checkerframework.checker.units.qual.C;
-import project.xunolan.karateBridge.infos.service.FeatureService;
 import project.xunolan.karateBridge.infos.service.entity.FeatureInfo;
 import project.xunolan.karateBridge.infos.service.entity.ScenarioInfo;
-import project.xunolan.web.entity.send.entity.SendMessageType;
+import project.xunolan.web.entity.send.entity.SendMsgType;
 import project.xunolan.web.entity.send.entity.SendMsgBase;
 import project.xunolan.web.service.WebSocketMessageDispatcher;
 import project.xunolan.web.utils.BeanUtils;
@@ -48,7 +46,7 @@ public class FeatureInfoReply extends SendMsgBase implements Serializable {
             featureInfoReplyList.add(FeatureInfoReply.fromFeatureInfo(featureInfo));
         }
         String content = JSON.toJSONString(featureInfoList);
-        String type = SendMessageType.FeatureInfoMsg.getMsgTypeStr();
+        String type = SendMsgType.FeatureInfoMsg.getMsgType();
         BeanUtils.getBean(WebSocketMessageDispatcher.class).OnSend(type, content);
     }
 }

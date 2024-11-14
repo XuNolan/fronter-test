@@ -7,7 +7,7 @@ import lombok.ToString;
 @ToString
 @Getter
 @AllArgsConstructor
-public enum RecvMessageType {
+public enum RecvMsgType {
     request( "request"),
     process( "process"),
     heartbeat( "heartbeat"),

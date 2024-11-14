@@ -12,6 +12,6 @@ import java.io.Serializable;
 @Builder
 @Accessors(chain = true)
 public class SendEntity implements Serializable {
-    String type;
+    String msgType;
     String content;
 }

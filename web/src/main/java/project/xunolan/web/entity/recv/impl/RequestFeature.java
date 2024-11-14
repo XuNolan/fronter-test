@@ -1,10 +1,7 @@
 package project.xunolan.web.entity.recv.impl;
 
-import project.xunolan.web.entity.send.entity.SendMessageType;
-import project.xunolan.web.utils.BeanUtils;
 import project.xunolan.web.entity.recv.RecvMsgBase;
 import project.xunolan.web.entity.send.entity.impl.FeatureInfoReply;
-import project.xunolan.web.service.WebSocketMessageDispatcher;
 
 public class RequestFeature extends RecvMsgBase {
 

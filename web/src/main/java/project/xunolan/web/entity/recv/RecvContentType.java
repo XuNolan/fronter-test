@@ -14,14 +14,14 @@ import project.xunolan.web.entity.recv.impl.RequestFeature;
 @Getter
 @AllArgsConstructor
 public enum RecvContentType {
-    request_feature(RecvMessageType.request, RequestFeature.class ,"request_feature"),
+    request_feature(RecvMsgType.request, RequestFeature.class ,"request_feature"),
 
-    scenario_start(RecvMessageType.process, ProcessScenarioStart.class, "scenario_start"),
-    scenario_stop(RecvMessageType.process, ProcessScenarioStop.class, "scenario_stop"),
-    scenario_replay(RecvMessageType.process, ProcessScenarioReplay.class, "scenario_replay"),
+    scenario_start(RecvMsgType.process, ProcessScenarioStart.class, "scenario_start"),
+    scenario_stop(RecvMsgType.process, ProcessScenarioStop.class, "scenario_stop"),
+    scenario_replay(RecvMsgType.process, ProcessScenarioReplay.class, "scenario_replay"),
 
     ;
-    final RecvMessageType parentType;
+    final RecvMsgType parentType;
     final Class<? extends RecvMsgBase> classProto;
     final String contentType;
 

@@ -32,7 +32,7 @@ public class WebSocketMessageDispatcher {
 
     public void OnSend(String type, String content) {
         try {
-            SendEntity sendEntity = SendEntity.builder().type(type).content(content).build();
+            SendEntity sendEntity = SendEntity.builder().msgType(type).content(content).build();
             webSocketServer.sendMessage(JSON.toJSONString(sendEntity));
         } catch (IOException e) {
             log.error("send message error ,type : {} , message content: {}, error info :{} ",type, content, e.getMessage());

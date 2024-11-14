@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import project.xunolan.web.entity.send.entity.SendMessageType;
+import project.xunolan.web.entity.send.entity.SendMsgType;
 import project.xunolan.web.service.WebSocketMessageDispatcher;
 import project.xunolan.web.utils.BeanUtils;
 
@@ -34,7 +34,7 @@ public class ExecuteResultInfo {
 
     public void constructAndSendExecuteResultInfo(){
         String content = JSON.toJSONString(this);
-        String type = SendMessageType.ExecuteInfoMsg.getMsgTypeStr();
+        String type = SendMsgType.ExecuteInfoMsg.getMsgType();
         BeanUtils.getBean(WebSocketMessageDispatcher.class).OnSend(type, content);
     }
 }
