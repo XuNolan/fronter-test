@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Builder
 @Accessors(chain = true)
 public class StepInfo implements Serializable {
-    String StepId;
+    String stepId;
     String prefix;
     String stepText;
 }

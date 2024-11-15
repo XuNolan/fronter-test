@@ -4,10 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import project.xunolan.web.service.WebSocketMessageDispatcher;
+import project.xunolan.web.utils.BeanUtils;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
@@ -27,8 +30,7 @@ public class WebSocketServer {
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        webSocketMessageDispatcher.OnRecv(message);
-
+        BeanUtils.getBean(WebSocketMessageDispatcher.class).OnRecv(message);
     }
 
     public void sendMessage(String message) throws IOException {

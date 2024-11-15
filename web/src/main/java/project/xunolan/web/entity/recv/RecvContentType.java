@@ -4,21 +4,19 @@ import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import project.xunolan.web.entity.recv.impl.ProcessScenarioReplay;
-import project.xunolan.web.entity.recv.impl.ProcessScenarioStart;
-import project.xunolan.web.entity.recv.impl.ProcessScenarioStop;
-import project.xunolan.web.entity.recv.impl.RequestFeature;
+import project.xunolan.web.entity.recv.impl.*;
 
 
 @ToString
 @Getter
 @AllArgsConstructor
 public enum RecvContentType {
+    controll_heartbeat(RecvMsgType.heartbeat, Heartbeat.class, "heartbeat"),
     request_feature(RecvMsgType.request, RequestFeature.class ,"request_feature"),
 
-    scenario_start(RecvMsgType.process, ProcessScenarioStart.class, "scenario_start"),
-    scenario_stop(RecvMsgType.process, ProcessScenarioStop.class, "scenario_stop"),
-    scenario_replay(RecvMsgType.process, ProcessScenarioReplay.class, "scenario_replay"),
+    feature_start(RecvMsgType.process, ProcessScenarioStart.class, "feature_start"),
+    feature_stop(RecvMsgType.process, ProcessScenarioStop.class, "feature_stop"),
+    feature_replay(RecvMsgType.process, ProcessScenarioReplay.class, "feature_replay"),
 
     ;
     final RecvMsgType parentType;

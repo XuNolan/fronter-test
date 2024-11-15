@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @Accessors(chain = true)
 public class ScenarioInfo implements Serializable {
-    String ScenarioId;
+    String scenarioId;
     String scenarioName;
     List<StepInfo> steps;
 }

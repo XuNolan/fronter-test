@@ -6,7 +6,9 @@ let reConnectNum = 0;
 
 let heartCheck = { //目前仅支持单设备。之后再标记当前浏览器终端。
     heartbeatData:{
-      type: "heartbeat", content:"",
+        msgType: "heartbeat",
+        contentType:"heartbeat",
+        content:{},
     },
     timeout: 60*1000,
     heartbeat:null,

@@ -6,18 +6,22 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import project.xunolan.web.entity.send.entity.SendMsgBase;
 import project.xunolan.web.entity.send.entity.SendMsgType;
 import project.xunolan.web.service.WebSocketMessageDispatcher;
 import project.xunolan.web.utils.BeanUtils;
 
+import javax.websocket.Session;
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Builder
 @Getter
 @Setter
 @Accessors(chain = true)
-public class ExecuteResultInfo {
-
+public class ExecuteResultInfo extends SendMsgBase implements Serializable {
+    private String featureId;
+    private String scenarioId;
     private String stepId;
     private String status;
     private String errorMsg;

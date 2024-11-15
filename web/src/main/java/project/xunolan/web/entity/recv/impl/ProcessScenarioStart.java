@@ -6,6 +6,8 @@ import project.xunolan.karateBridge.infos.service.FeatureService;
 import project.xunolan.web.utils.BeanUtils;
 import project.xunolan.web.entity.recv.RecvMsgBase;
 
+import javax.websocket.Session;
+
 public class ProcessScenarioStart extends RecvMsgBase {
     //执行单位为feature。
     String featureId;

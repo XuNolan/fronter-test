@@ -17,12 +17,12 @@ import java.io.IOException;
 @Slf4j
 public class WebSocketMessageDispatcher {
 
-    @Autowired
     public WebSocketServer webSocketServer;
 
     @Autowired
-    public FeatureService featureService;
-
+    public void setWebSocketServer(WebSocketServer webSocketServer) {
+        this.webSocketServer = webSocketServer;
+    }
 
     public void OnRecv(String message) {
         RecvEntity recvEntity = JSON.parseObject(message, RecvEntity.class);

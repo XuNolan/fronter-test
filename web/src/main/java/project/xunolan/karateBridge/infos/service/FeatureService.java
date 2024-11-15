@@ -33,6 +33,7 @@ public class FeatureService {
     @Getter
     private final static Map<Step, StepInfo> stepInfoMap = new HashMap<>();
 
+    @Getter
     private final static String ID_INTERVAL = "_";
 
     //懒加载。不应当放在构造函数内部，应当自己提出，构造函数仅完成了一次调用。
@@ -59,14 +60,14 @@ public class FeatureService {
             featureInfoMap.put(feature, featureInfo);
             for(int scenarioNum = 0; scenarioNum < feature.getSections().size(); scenarioNum++){
                 Scenario scenario = feature.getSections().get(scenarioNum).getScenario();
-                ScenarioInfo scenarioInfo = ScenarioInfo.builder().ScenarioId(featureInfo.getFeatureId() + ID_INTERVAL + scenarioNum)
+                ScenarioInfo scenarioInfo = ScenarioInfo.builder().scenarioId(featureInfo.getFeatureId() + ID_INTERVAL + scenarioNum)
                         .scenarioName(scenario.getName()).build();
                 scenarioInfo.setSteps(new ArrayList<>());
                 featureInfo.getScenarios().add(scenarioInfo);
                 scenarioInfoMap.put(scenario, scenarioInfo);
                 for(int stepNum = 0; stepNum < scenario.getSteps().size(); stepNum++){
                     Step step = scenario.getSteps().get(stepNum);
-                    StepInfo stepInfo = StepInfo.builder().StepId(scenarioInfo.getScenarioId() + ID_INTERVAL + stepNum)
+                    StepInfo stepInfo = StepInfo.builder().stepId(scenarioInfo.getScenarioId() + ID_INTERVAL + stepNum)
                             .prefix(step.getPrefix()).stepText(step.getText()).build();
                     scenarioInfo.getSteps().add(stepInfo);
                     stepInfoMap.put(step, stepInfo);
