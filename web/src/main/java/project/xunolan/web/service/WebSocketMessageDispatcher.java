@@ -11,6 +11,7 @@ import project.xunolan.web.entity.recv.RecvEntity;
 import project.xunolan.web.entity.recv.RecvMsgBase;
 import project.xunolan.web.server.WebSocketServer;
 
+import javax.websocket.Session;
 import java.io.IOException;
 
 @Service
@@ -24,16 +25,16 @@ public class WebSocketMessageDispatcher {
         this.webSocketServer = webSocketServer;
     }
 
-    public void OnRecv(String message) {
+    public void OnRecv(Session session, String message) {
         RecvEntity recvEntity = JSON.parseObject(message, RecvEntity.class);
         RecvMsgBase recvMsgBase = RecvContentType.parseRawContent(recvEntity.getContent(), recvEntity.getMsgType(), recvEntity.getContentType());
-        recvMsgBase.processMsg();
+        recvMsgBase.processMsg(session);
     }
 
-    public void OnSend(String type, String content) {
+    public void OnSend(Session session, String type, String content) {
         try {
             SendEntity sendEntity = SendEntity.builder().msgType(type).content(content).build();
-            webSocketServer.sendMessage(JSON.toJSONString(sendEntity));
+            webSocketServer.sendMessage(session, JSON.toJSONString(sendEntity));
         } catch (IOException e) {
             log.error("send message error ,type : {} , message content: {}, error info :{} ",type, content, e.getMessage());
         }

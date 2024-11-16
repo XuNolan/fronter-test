@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import project.xunolan.karateBridge.actions.service.hooks.HookService;
 import project.xunolan.karateBridge.infos.service.entity.FeatureInfo;
 
+import javax.websocket.Session;
+
 
 @Service
 public class ProcessService {
@@ -15,7 +17,7 @@ public class ProcessService {
     @Autowired
     HookService hookService;
 
-    public void RunFeature(FeatureInfo featureInfo){
+    public void RunFeature(Session session, FeatureInfo featureInfo){
         /*
         Feature feature = Feature.read("classpath:com/intuit/karate/core/single-scenario.feature");
         FeatureCall featureCall = new FeatureCall(feature, "@Scenario2", -1, null);
@@ -27,6 +29,7 @@ public class ProcessService {
         Feature feature = featureInfo.getFeature();
         FeatureCall featureCall = new FeatureCall(feature);
         Runner.Builder customizeBuilder = Runner.builder().hooks(hookService.getCommonHooks());
+        customizeBuilder.systemProperty("sessionId", session.getId());
 
         FeatureRuntime featureRuntime = FeatureRuntime.of(new Suite(customizeBuilder), featureCall, null);
         featureRuntime.run();

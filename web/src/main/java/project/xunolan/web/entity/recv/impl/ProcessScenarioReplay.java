@@ -6,7 +6,7 @@ import javax.websocket.Session;
 
 public class ProcessScenarioReplay extends RecvMsgBase {
     @Override
-    public void processMsg() {
+    public void processMsg(Session session) {
 
     }
     //tocomplete

@@ -36,9 +36,9 @@ public class ExecuteResultInfo extends SendMsgBase implements Serializable {
                 .build();
     }
 
-    public void constructAndSendExecuteResultInfo(){
+    public void constructAndSendExecuteResultInfo(Session session){
         String content = JSON.toJSONString(this);
         String type = SendMsgType.ExecuteInfoMsg.getMsgType();
-        BeanUtils.getBean(WebSocketMessageDispatcher.class).OnSend(type, content);
+        BeanUtils.getBean(WebSocketMessageDispatcher.class).OnSend(session, type, content);
     }
 }

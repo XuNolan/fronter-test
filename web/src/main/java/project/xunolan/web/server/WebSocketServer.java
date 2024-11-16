@@ -17,24 +17,22 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint(value = "/websocket")
 public class WebSocketServer {
 
-    private Session session;
-
-    @Autowired
-    public WebSocketMessageDispatcher webSocketMessageDispatcher;
+    static public Map<String, Session> sessionMap = new ConcurrentHashMap<>();
 
     @OnOpen
     public void onOpen(Session session) {
-        this.session = session;
+        log.info("session open: id {}", session.getId());
+        sessionMap.put(session.getId(), session);
     }
-
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        BeanUtils.getBean(WebSocketMessageDispatcher.class).OnRecv(message);
+        BeanUtils.getBean(WebSocketMessageDispatcher.class).OnRecv(session, message);
     }
 
-    public void sendMessage(String message) throws IOException {
-        this.session.getBasicRemote().sendText(message);
+    public void sendMessage(Session session, String message) throws IOException {
+        log.info("session sendText: id {}, text {}", session.getId(), message);
+        session.getBasicRemote().sendText(message);
     }
 
     @OnError

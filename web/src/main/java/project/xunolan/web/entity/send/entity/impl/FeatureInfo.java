@@ -39,7 +39,7 @@ public class FeatureInfo extends SendMsgBase implements Serializable {
                 .scenarios(featureInfo.getScenarios()).build();
     }
 
-    public static void constructAndSendFeatureInfoReply(boolean needReload){
+    public static void constructAndSendFeatureInfoReply(Session session, boolean needReload){
         List<project.xunolan.karateBridge.infos.service.entity.FeatureInfo> featureInfoList = project.xunolan.karateBridge.infos.service.entity.FeatureInfo.constructFeatureInfo(needReload);
         List<FeatureInfo> featureInfoReplyList = new ArrayList<>();
         for(project.xunolan.karateBridge.infos.service.entity.FeatureInfo featureInfo : featureInfoList){
@@ -47,6 +47,6 @@ public class FeatureInfo extends SendMsgBase implements Serializable {
         }
         String content = JSON.toJSONString(featureInfoList);
         String type = SendMsgType.FeatureInfoMsg.getMsgType();
-        BeanUtils.getBean(WebSocketMessageDispatcher.class).OnSend(type, content);
+        BeanUtils.getBean(WebSocketMessageDispatcher.class).OnSend(session, type, content);
     }
 }

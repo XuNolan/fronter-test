@@ -8,7 +8,7 @@ import javax.websocket.Session;
 public class Heartbeat extends RecvMsgBase {
 
     @Override
-    public void processMsg() {
-        ManageHeartbeatInfo.constructAndSendHeartbeat();
+    public void processMsg(Session session) {
+        ManageHeartbeatInfo.constructAndSendHeartbeat(session);
     }
 }

@@ -6,6 +6,7 @@ import com.intuit.karate.core.*;
 import project.xunolan.karateBridge.infos.service.FeatureService;
 import project.xunolan.karateBridge.infos.service.entity.StepInfo;
 import project.xunolan.web.entity.send.entity.impl.ExecuteResultInfo;
+import project.xunolan.web.server.WebSocketServer;
 
 public class StepResultDisplayRuntimeHook implements RuntimeHook {
 
@@ -24,7 +25,7 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         executeResultInfo.setFeatureId(featureId);
         executeResultInfo.setScenarioId(scenarioId);
         executeResultInfo.setStepId(stepId);
-        executeResultInfo.constructAndSendExecuteResultInfo();
+        executeResultInfo.constructAndSendExecuteResultInfo(WebSocketServer.sessionMap.get(sr.featureRuntime.suite.systemProperties.get("sessionId")));
     }
 
 }

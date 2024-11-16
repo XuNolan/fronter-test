@@ -10,8 +10,8 @@ public class RequestFeature extends RecvMsgBase {
     //好像没有其他字段。
 
     @Override
-    public void processMsg() {
+    public void processMsg(Session session) {
         //todo：之后在发送信息时携带版本id。前端保存，发起执行请求时后端这边检查版本id是否正确，不正确时reload 提示更新再处理。
-        FeatureInfo.constructAndSendFeatureInfoReply(false);
+        FeatureInfo.constructAndSendFeatureInfoReply(session, false);
     }
 }

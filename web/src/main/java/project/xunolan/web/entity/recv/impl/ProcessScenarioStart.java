@@ -12,9 +12,9 @@ public class ProcessScenarioStart extends RecvMsgBase {
     //执行单位为feature。
     String featureId;
     @Override
-    public void processMsg() {
+    public void processMsg(Session session) {
         FeatureInfo featureInfo = FeatureService.getFeatureInfoMap().get(this.featureId);
         ProcessService processService = BeanUtils.getBean(ProcessService.class);
-        processService.RunFeature(featureInfo);
+        processService.RunFeature(session, featureInfo);
     }
 }
