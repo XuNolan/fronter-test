@@ -6,11 +6,14 @@ import project.xunolan.common.entity.BasicResultVO;
 import project.xunolan.common.entity.ScriptDisplayListVo;
 import project.xunolan.common.enums.RespStatusEnum;
 import project.xunolan.database.entity.Script;
+import project.xunolan.database.entity.Usecase;
 import project.xunolan.web.amisRespVo.AmisCrudListVo;
 import project.xunolan.web.amisRespVo.ScriptFilterParam;
 import project.xunolan.web.amisRespVo.aspect.AmisResult;
 import project.xunolan.web.amisRespVo.utils.Convert4Amis;
 import project.xunolan.web.service.ScriptService;
+import project.xunolan.web.service.UsecaseService;
+import project.xunolan.web.testRespVo.ScriptTestInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,9 @@ import java.util.Map;
 public class ScriptController {
     @Autowired
     private ScriptService scriptService;
+
+    @Autowired
+    private UsecaseService usecaseService;
 
     @GetMapping("/list")
     public AmisCrudListVo queryDisplayList(ScriptFilterParam scriptFilterParam) {
@@ -66,5 +72,19 @@ public class ScriptController {
         scriptService.deActiveScript(scriptId);
     }
 
+
+    @GetMapping("/testInfo")
+    public Map<String, Object> getTestInfo(@RequestParam("scriptId") Long scriptId){
+        Script script = scriptService.queryScriptByScriptId(scriptId);
+        Usecase usecase = usecaseService.queryById(script.getUsecaseId());
+        ScriptTestInfo scriptTestInfo = ScriptTestInfo.builder()
+                .usecaseName(usecase.getName())
+                .usecaseDescription(usecase.getDescription())
+                .scriptName(script.getName())
+                .scriptDescription(script.getDescription())
+                .version(script.getVersion())
+                .data(script.getData()).build();
+        return Convert4Amis.flatSingleMap(scriptTestInfo);
+    }
 
 }
