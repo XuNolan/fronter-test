@@ -27,6 +27,8 @@ export default {
 }
 
 //可不可以直接反序列化？
+//需要根据id来注入到对应位置，避免出现乱序？
+//todo。暂时没出现问题。之后需要根据id来以数组形式进行逐步放入。待修复。
 function messageHandler(jsonMessage){
   let msgType = jsonMessage['msgType'];
   let jsonObject = JSON.parse(jsonMessage["content"]);
@@ -37,11 +39,11 @@ function messageHandler(jsonMessage){
       features.push(JSON.parse(JSON.stringify(jsonObject[featureNum])));
     }
   } else if(msgType === 'executeInfos') {
-    let toChange = features.at(jsonObject["featureId"]).scenarios.at(jsonObject["scenarioId"]).steps.at(jsonObject["stepId"]);
-    toChange.executeInfo = jsonObject["errorMsg"];
-    toChange.status = jsonObject["status"];
-    toChange.startTime = jsonObject["startTime"];
-    toChange.endTime = jsonObject["endTime"];
+    console.log(features);
+    features[jsonObject["featureId"]].scenarios[jsonObject["scenarioId"]].steps[jsonObject["stepId"]].executeInfo = jsonObject["errorMsg"];
+    features[jsonObject["featureId"]].scenarios[jsonObject["scenarioId"]].steps[jsonObject["stepId"]].status = jsonObject["status"];
+    features[jsonObject["featureId"]].scenarios[jsonObject["scenarioId"]].steps[jsonObject["stepId"]].startTime = jsonObject["startTime"];
+    features[jsonObject["featureId"]].scenarios[jsonObject["scenarioId"]].steps[jsonObject["stepId"]].endTime = jsonObject["endTime"];
   }
   else {
     console.log("other type hasn't complete yet");

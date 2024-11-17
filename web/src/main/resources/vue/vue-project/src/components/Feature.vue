@@ -4,7 +4,7 @@
       <h2>feature {{feature.featureId}} : {{feature.featureName}}</h2>
 
       <div class="feature_btns">
-        <button id="start_btn" v-on:click="feature_start($(feature.featureId))" class="feature_btn">start</button>
+        <button id="start_btn" v-on:click="feature_start(feature)" class="feature_btn">start</button>
 
         <button id="palse" >palse</button>
 
@@ -35,12 +35,12 @@ export default {
     feature_start,
   }
 }
-function feature_start(featureId){
+function feature_start(feature){
   let startFeatureRequest = {
     msgType:"process",
     contentType:"feature_start",
     content:{
-      featureId:featureId,
+      featureId:feature.featureId,
     }
   };
   sendMessage(startFeatureRequest);

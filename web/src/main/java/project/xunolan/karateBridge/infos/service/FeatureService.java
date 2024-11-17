@@ -25,14 +25,13 @@ public class FeatureService {
     @Getter
     private final static Map<String,  Feature> featureMap = new HashMap<>(); //filename - feature
 
-    //暂时使用递增id及拼接。
     @Getter
-    private final static Map<Feature, FeatureInfo> featureInfoMap = new HashMap<>();
+    private final static Map<String, FeatureInfo> featureInfoMap = new HashMap<>();
     //但是这个好像完全没用啊
     @Getter
-    private final static Map<ScenarioOutline, ScenarioInfo> scenarioInfoMap = new HashMap<>();
+    private final static Map<String, ScenarioInfo> scenarioInfoMap = new HashMap<>();
     @Getter
-    private final static Map<Step, StepInfo> stepInfoMap = new HashMap<>();
+    private final static Map<String, StepInfo> stepInfoMap = new HashMap<>();
 
     @Getter
     private final static String ID_INTERVAL = "_";
@@ -58,7 +57,7 @@ public class FeatureService {
             FeatureInfo featureInfo = FeatureInfo.builder().featureId(String.valueOf(featureNum)).
                     featureName(feature.getName()).fileName(feature.getResource().getFileNameWithoutExtension()).feature(feature).build();
             featureInfo.setScenarios(new ArrayList<>());
-            featureInfoMap.put(feature, featureInfo);
+            featureInfoMap.put(featureInfo.getFeatureId(), featureInfo);
             for(int scenarioNum = 0; scenarioNum < feature.getSections().size(); scenarioNum++){
                 Scenario scenario = feature.getSections().get(scenarioNum).getScenario();
                 ScenarioOutline scenarioOutline = feature.getSections().get(scenarioNum).getScenarioOutline();
@@ -66,13 +65,13 @@ public class FeatureService {
                         .scenarioName(scenario == null? null : scenario.getName()).build();
                 scenarioInfo.setSteps(new ArrayList<>());
                 featureInfo.getScenarios().add(scenarioInfo);
-                scenarioInfoMap.put(scenarioOutline, scenarioInfo);
+                scenarioInfoMap.put(scenarioInfo.getScenarioId(), scenarioInfo);
                 for(int stepNum = 0; stepNum < scenarioOutline.getSteps().size(); stepNum++){
                     Step step = scenarioOutline.getSteps().get(stepNum);
                     StepInfo stepInfo = StepInfo.builder().stepId(scenarioInfo.getScenarioId() + ID_INTERVAL + stepNum)
                             .prefix(step.getPrefix()).stepText(step.getText()).build();
                     scenarioInfo.getSteps().add(stepInfo);
-                    stepInfoMap.put(step, stepInfo);
+                    stepInfoMap.put(stepInfo.getStepId(), stepInfo);
                 }
             }
         }

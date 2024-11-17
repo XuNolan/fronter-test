@@ -10,7 +10,7 @@ import javax.websocket.Session;
 
 public class ProcessScenarioStart extends RecvMsgBase {
     //执行单位为feature。
-    String featureId;
+    public String featureId;
     @Override
     public void processMsg(Session session) {
         FeatureInfo featureInfo = FeatureService.getFeatureInfoMap().get(this.featureId);

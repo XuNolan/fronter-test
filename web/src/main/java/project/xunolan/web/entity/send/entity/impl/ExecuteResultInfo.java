@@ -30,7 +30,7 @@ public class ExecuteResultInfo extends SendMsgBase implements Serializable {
 
     public static ExecuteResultInfo fromResult(Result result) {
         return ExecuteResultInfo.builder().status(result.getStatus())
-                .errorMsg(result.getError().getMessage())
+                .errorMsg(result.getErrorMessage())
                 .startTime(new Timestamp(result.getStartTime()).toString())
                 .endTime(new Timestamp(result.getEndTime()).toString())
                 .build();
