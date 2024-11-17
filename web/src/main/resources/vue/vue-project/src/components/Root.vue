@@ -4,11 +4,11 @@
 <script>
 import {reactive} from "vue";
 import {initWebSocket, sendMessage, webSocket} from "./websocket.js";
-import Scenario from "./Scenario.vue";
+import Feature from "./Feature.vue";
 let featureInfoReplies = [];
 let features;
 export default {
-  components: {Scenario},
+  components: {Feature},
   setup(){
     let getScenarioReq = {
       msgType:"request",
@@ -55,11 +55,11 @@ function messageHandler(jsonMessage){
   </head>
   <body>
     <main>
-      <div >
-        <Scenario
+      <div>
+        <Feature
             v-for="feature in features"
             :feature="feature"
-            class="scenario_style"/>
+            />
       </div>
 
     </main>
@@ -67,9 +67,5 @@ function messageHandler(jsonMessage){
 </template>
 
 <style scoped>
-.scenario_style{
-  border: 4px solid red;
-  margin: 5px;
-}
 
 </style>
