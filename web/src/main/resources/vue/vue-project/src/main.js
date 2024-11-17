@@ -1,9 +1,9 @@
 import { createApp } from 'vue'
 //根组件
 import router from './router'
-import Scenario from "./components/Scenario.vue";
+import Root from "./components/Root.vue";
 
-const app = createApp(Scenario)
+const app = createApp(Root)
 app.use(router)
 app.mount('#app')
 //应用实例必须在调用了.mount方法后才会渲染出来。这里只是指明了app组件的渲染位置。
