@@ -1,11 +1,11 @@
 import { createApp } from 'vue'
 //根组件
-import Scenario from './components/Scenario.vue'
 import router from './router'
+import Scenario from "./components/Scenario.vue";
 
 const app = createApp(Scenario)
 app.use(router)
-
+app.mount('#app')
 //应用实例必须在调用了.mount方法后才会渲染出来。这里只是指明了app组件的渲染位置。
 //当应用发起请求时，渲染过程是什么？
 //请求页面 请求html，在构建dom树的时候发起请求js、返回js，然后加载到这里的时候完成挂载。然后dom最终完成渲染？
@@ -24,4 +24,4 @@ app.use(router)
 // 异步js不会影响dom解析，但是还是会卡在cssom解析。
 // 但是可以肯定的是，渲染树布局和绘制，肯定在外部请求资源之后。
 // 那么，js运行结果，也就是组件，逻辑还是那个需要在渲染树布局之前完成。  是可以的。
-app.mount('#app')
+

@@ -2,6 +2,7 @@ package project.xunolan.karateBridge.infos.service;
 
 import com.intuit.karate.core.Feature;
 import com.intuit.karate.core.Scenario;
+import com.intuit.karate.core.ScenarioOutline;
 import com.intuit.karate.core.Step;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ import java.util.*;
 @Slf4j
 @Service
 public class FeatureService {
-    private final static String featureDirPath = "src/main/resources/features";
+    private final static String featureDirPath = "web/src/main/resources/feature";
     private static File dir;
     //除了保存此处映射之外，还要保存至少每次读取的唯一性。
 
@@ -29,7 +30,7 @@ public class FeatureService {
     private final static Map<Feature, FeatureInfo> featureInfoMap = new HashMap<>();
     //但是这个好像完全没用啊
     @Getter
-    private final static Map<Scenario, ScenarioInfo> scenarioInfoMap = new HashMap<>();
+    private final static Map<ScenarioOutline, ScenarioInfo> scenarioInfoMap = new HashMap<>();
     @Getter
     private final static Map<Step, StepInfo> stepInfoMap = new HashMap<>();
 
@@ -60,13 +61,14 @@ public class FeatureService {
             featureInfoMap.put(feature, featureInfo);
             for(int scenarioNum = 0; scenarioNum < feature.getSections().size(); scenarioNum++){
                 Scenario scenario = feature.getSections().get(scenarioNum).getScenario();
+                ScenarioOutline scenarioOutline = feature.getSections().get(scenarioNum).getScenarioOutline();
                 ScenarioInfo scenarioInfo = ScenarioInfo.builder().scenarioId(featureInfo.getFeatureId() + ID_INTERVAL + scenarioNum)
-                        .scenarioName(scenario.getName()).build();
+                        .scenarioName(scenario == null? null : scenario.getName()).build();
                 scenarioInfo.setSteps(new ArrayList<>());
                 featureInfo.getScenarios().add(scenarioInfo);
-                scenarioInfoMap.put(scenario, scenarioInfo);
-                for(int stepNum = 0; stepNum < scenario.getSteps().size(); stepNum++){
-                    Step step = scenario.getSteps().get(stepNum);
+                scenarioInfoMap.put(scenarioOutline, scenarioInfo);
+                for(int stepNum = 0; stepNum < scenarioOutline.getSteps().size(); stepNum++){
+                    Step step = scenarioOutline.getSteps().get(stepNum);
                     StepInfo stepInfo = StepInfo.builder().stepId(scenarioInfo.getScenarioId() + ID_INTERVAL + stepNum)
                             .prefix(step.getPrefix()).stepText(step.getText()).build();
                     scenarioInfo.getSteps().add(stepInfo);

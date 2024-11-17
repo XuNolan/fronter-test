@@ -28,6 +28,7 @@ public class WebSocketServer {
     @OnMessage
     public void onMessage(String message, Session session) {
         BeanUtils.getBean(WebSocketMessageDispatcher.class).OnRecv(session, message);
+        log.info("message received: {}", message);
     }
 
     public void sendMessage(Session session, String message) throws IOException {
@@ -40,5 +41,9 @@ public class WebSocketServer {
         log.error("websocket 发生错误，{}", error.getMessage());
     }
 
+    @OnClose
+    public void onClose(Session session, CloseReason closeReason) {
+        log.info("websocket close: id {}, reason {}", session.getId(), closeReason);
+    }
 
 }

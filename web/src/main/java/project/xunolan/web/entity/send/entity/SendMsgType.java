@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import project.xunolan.web.entity.send.entity.impl.ExecuteResultInfo;
-import project.xunolan.web.entity.send.entity.impl.FeatureInfo;
+import project.xunolan.web.entity.send.entity.impl.SendFeatureInfo;
 import project.xunolan.web.entity.send.entity.impl.ManageHeartbeatInfo;
 
 import java.lang.reflect.InvocationTargetException;
@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 @Getter
 @AllArgsConstructor
 public enum SendMsgType {
-    FeatureInfoMsg(FeatureInfo.class, "featureInfos"),
+    FeatureInfoMsg(SendFeatureInfo.class, "featureInfos"),
     ExecuteInfoMsg(ExecuteResultInfo.class, "executeInfos"), //hasn't complete
     ManageHeartbeatInfoMsg(ManageHeartbeatInfo.class, "heartbeat"),
 

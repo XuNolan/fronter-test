@@ -100,3 +100,5 @@ export function closeWebsocket(){
     console.log('webSocket已经关闭');
     reConnectNum = 0;
 }
+
+export{isConnect, webSocket}
