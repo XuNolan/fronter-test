@@ -91,6 +91,7 @@ export function initWebSocket(websocketUrl, callback){
 }
 
 export function sendMessage(message){
+    console.log(message);
     webSocket.send(JSON.stringify(message));
 }
 

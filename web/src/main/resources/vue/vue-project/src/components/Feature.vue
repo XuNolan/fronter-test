@@ -11,6 +11,9 @@
         <button id="stop" >stop</button>
 
         <button id="replay">replay</button>
+
+        <input type="checkbox" id="checkbox" v-model="needRecord">
+        <label for="checkbox">{{ needRecord }}</label>
       </div>
     </div>
 
@@ -27,10 +30,16 @@
 <script>
 import {sendMessage} from "./websocket.js";
 import Step from "./Step.vue";
+import {ref} from "vue";
+
+let needRecord = ref(false);
 
 export default {
   components: {Step},
   props: ['feature'],
+  data() {
+    return {needRecord};
+  },
   methods: {
     feature_start,
   }
@@ -41,6 +50,7 @@ function feature_start(feature){
     contentType:"feature_start",
     content:{
       featureId:feature.featureId,
+      needRecord: needRecord.value,
     }
   };
   sendMessage(startFeatureRequest);

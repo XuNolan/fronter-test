@@ -66,8 +66,10 @@ public class FeatureService {
                 scenarioInfo.setSteps(new ArrayList<>());
                 featureInfo.getScenarios().add(scenarioInfo);
                 scenarioInfoMap.put(scenarioInfo.getScenarioId(), scenarioInfo);
-                for(int stepNum = 0; stepNum < scenarioOutline.getSteps().size(); stepNum++){
-                    Step step = scenarioOutline.getSteps().get(stepNum);
+                List<Step> steps = scenarioOutline != null? scenarioOutline.getSteps() : (scenario != null? scenario.getSteps() : null);
+                assert steps != null;
+                for(int stepNum = 0; stepNum < steps.size(); stepNum++){
+                    Step step = steps.get(stepNum);
                     StepInfo stepInfo = StepInfo.builder().stepId(scenarioInfo.getScenarioId() + ID_INTERVAL + stepNum)
                             .prefix(step.getPrefix()).stepText(step.getText()).build();
                     scenarioInfo.getSteps().add(stepInfo);
