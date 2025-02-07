@@ -1,11 +1,10 @@
 use front_tester;
 
-create table if not exists `usecase_info`
+create table if not exists `usecase`
 (
     `id`  bigint(20) NOT NULL AUTO_INCREMENT,
     `name` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '用例名',
-    `describe` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '用例描述',
-    `script_id` bigint(20) NOT NULL COMMENT '当前用例脚本',
+    `description` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '用例描述',
     `created`          int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
     `updated`          int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
     PRIMARY KEY (`id`)
@@ -19,12 +18,15 @@ create table if not exists `script`
 (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `usecase_id` bigint(20) NOT NULL,
-    `version` int(15) NOT NULL,
-    `script_data`       varchar(1024) COLLATE utf8mb4_unicode_ci COMMENT '脚本数据',
+    `version` varchar(16) NOT NULL,
+    `name` varchar(20) NOT NULL default '' COLLATE utf8mb4_unicode_ci COMMENT '用例名',
+    `description` varchar(64) NOT NULL default '' COLLATE utf8mb4_unicode_ci COMMENT '简单介绍',
+    `data`       varchar(1024) NOT NULL default '' COLLATE utf8mb4_unicode_ci COMMENT '脚本数据',
+    `is_active` tinyint NOT NULL COMMENT '是否活动：0否. 1.是， 一个usecase至多有一个活动',
     `created`          int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
     `updated`          int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
-    `is_active`       tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否在使用 1在 0不在',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    KEY (`version`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   DEFAULT Charset = utf8mb4
@@ -76,7 +78,8 @@ create table if not exists `execute_group_id`
 (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `execute_name` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '执行组名',
-    `group_execute_status` tinyint(4) NOT NULL COMMENT '整个组的执行状态：0执行成功 1执行失败 2执行中止'
+    `group_execute_status` tinyint(4) NOT NULL COMMENT '整个组的执行状态：0执行成功 1执行失败 2执行中止',
+     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
  DEFAULT Charset = utf8mb4
  COLLATE = utf8mb4_unicode_ci COMMENT = '执行组信息';
@@ -93,3 +96,15 @@ create table if not exists `record_info`
 ) ENGINE = InnoDB
   DEFAULT Charset = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT = '录像信息关联信息';
+
+insert into usecase (id, name, description, created, updated) values (1, '用例名1', '描述1', 1646274195, 1646274195);
+insert into usecase (id, name, description, created, updated) values (2, '用例名2', '描述2', 1646274144, 1646274144);
+
+insert into script (id, usecase_id, version, name, description, data, is_active, created, updated)
+values (1, 1, '1.0', '脚本1', '用例1 的脚本1', 'script \n test test \n test', 1, 1646274195, 1646274195);
+
+insert into script (id, usecase_id, version, name, description, data, is_active, created, updated)
+values (2, 1, '2.0', '脚本2', '用例1 的脚本2', 'script \n test test \n test failed', 0, 1646274122, 1646274122);
+
+insert into script (id, usecase_id, version, name, description, data, is_active, created, updated)
+values (3, 2, '1.0', '脚本1', '用例2 的脚本1', 'scriptvslduvgls \n test test \n test', 1, 1646274155, 1646274155);
