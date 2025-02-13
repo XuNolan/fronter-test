@@ -98,7 +98,7 @@ public class UsecaseServiceImpl implements UsecaseService {
                     .scriptName(activeScript == null? null:activeScript.getName())
                     .scriptDescription(activeScript == null? null:activeScript.getDescription())
                     .version(activeScript == null? null:activeScript.getVersion())
-                    .lastExecuteTime(executeLog == null? null: LocalDateTime.ofInstant(Instant.ofEpochSecond(executeLog.getExecuteTime()), ZoneId.systemDefault()).toString())
+                    .lastExecuteTime(String.valueOf(executeLog == null? null: executeLog.getExecuteTime()))
                     .status(executeLog == null? 0 : executeLog.getStatus()).build());
         }
         return result;

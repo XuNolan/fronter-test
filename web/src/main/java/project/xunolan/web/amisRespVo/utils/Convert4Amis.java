@@ -4,6 +4,9 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ReflectUtil;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +31,13 @@ public class Convert4Amis {
         Map<String, Object> result = MapUtil.newHashMap(32);
         Field[] fields = ReflectUtil.getFields(obj.getClass());
         for (Field field : fields) {
-            result.put(field.getName(), ReflectUtil.getFieldValue(obj, field)); //todo:时间转str。
+            if(field.getName().equals("created") || field.getName().equals("updated")){
+                Integer timeValue = (Integer) ReflectUtil.getFieldValue(obj, field);
+                result.put(field.getName(),
+                        LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(String.valueOf(timeValue))), ZoneId.systemDefault()).toString());
+            }
+            else
+                result.put(field.getName(), ReflectUtil.getFieldValue(obj, field));
         }
         return result;
     }
@@ -40,7 +49,13 @@ public class Convert4Amis {
         Map<String, Object> result = MapUtil.newHashMap(32);
         Field[] fields = ReflectUtil.getFields(obj.getClass());
         for (Field field : fields) {
-            result.put(prefix + prefixSpliter + field.getName(), ReflectUtil.getFieldValue(obj, field)); //todo:时间转str。
+            if(field.getName().equals("created") || field.getName().equals("updated")){
+                Integer timeValue = (Integer) ReflectUtil.getFieldValue(obj, field);
+                result.put(prefix + prefixSpliter + field.getName(),
+                        LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(String.valueOf(timeValue))), ZoneId.systemDefault()).toString());
+            }
+            else
+                result.put(prefix + prefixSpliter + field.getName(), ReflectUtil.getFieldValue(obj, field));
         }
         return result;
     }
