@@ -1,11 +1,7 @@
 package project.xunolan.database.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import project.xunolan.database.entity.Usecase;
-import project.xunolan.database.repository.entity.DisplayListVo;
 
 import java.util.List;
 

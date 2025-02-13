@@ -1,4 +1,4 @@
-package project.xunolan.database.repository.entity;
+package project.xunolan.common.entity;
 
 
 import lombok.AllArgsConstructor;
@@ -6,13 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import javax.persistence.Access;
-
 @Builder
 @Data
 @AllArgsConstructor
 @Accessors(chain = true)
-public class DisplayListVo {
+public class UsecaseDisplayListVo {
     private String id;
     private String version;
     private String usecaseName;

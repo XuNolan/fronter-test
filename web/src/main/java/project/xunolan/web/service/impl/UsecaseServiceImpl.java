@@ -2,7 +2,6 @@ package project.xunolan.web.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import project.xunolan.database.entity.ExecuteLog;
@@ -11,7 +10,7 @@ import project.xunolan.database.entity.Usecase;
 import project.xunolan.database.repository.ExecuteLogRepository;
 import project.xunolan.database.repository.ScriptRepository;
 import project.xunolan.database.repository.UsecaseRepository;
-import project.xunolan.database.repository.entity.DisplayListVo;
+import project.xunolan.common.entity.UsecaseDisplayListVo;
 import project.xunolan.web.service.UsecaseService;
 import project.xunolan.web.amisRespVo.UsecaseFilterParam;
 
@@ -54,7 +53,7 @@ public class UsecaseServiceImpl implements UsecaseService {
 
     @Override
     public Usecase queryById(Long id) {
-        return null;
+        return usecaseRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -70,11 +69,11 @@ public class UsecaseServiceImpl implements UsecaseService {
     }
 
     @Override
-    public List<DisplayListVo> queryList(UsecaseFilterParam param) {
+    public List<UsecaseDisplayListVo> queryList(UsecaseFilterParam param) {
 
         //需要根据usecaseFilterParam筛选相关方法
         PageRequest pageRequest = PageRequest.of(param.getPage() - 1, param.getPerPage());
-        List<DisplayListVo> result = new ArrayList<>();
+        List<UsecaseDisplayListVo> result = new ArrayList<>();
         //先找usecase；
         List<Usecase> usecases;
         if(param.getKeyword()!=null){
@@ -89,7 +88,7 @@ public class UsecaseServiceImpl implements UsecaseService {
             if(activeScript != null){
                 executeLog = executeLogRepository.findFirstByScriptIdOrderByExecuteTimeDesc(activeScript.getId());
             }
-            result.add(DisplayListVo.builder()
+            result.add(UsecaseDisplayListVo.builder()
                     .id(String.valueOf(usecaseId))
                     .usecaseName(usecase.getName())
                     .usecaseDescription(usecase.getDescription())

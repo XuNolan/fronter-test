@@ -1,1 +1,1 @@
-http://localhost:8888/usecase/list?page=1&perPage=10
+http://localhost:8080/usecase/list?page=2&perPage=100

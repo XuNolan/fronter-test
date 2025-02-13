@@ -12,7 +12,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UsecaseListVo {
+public class AmisCrudListVo {
     private List<Map<String, Object>> items;
     private int total;
     private int page;
