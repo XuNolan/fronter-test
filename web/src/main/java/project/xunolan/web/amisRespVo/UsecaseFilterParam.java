@@ -18,7 +18,7 @@ public class UsecaseFilterParam {
     @NotNull
     private Integer perPage = 10;
 
-    private String keyword;
+    private String keywords;
 
 //    private String orderBy;
 //

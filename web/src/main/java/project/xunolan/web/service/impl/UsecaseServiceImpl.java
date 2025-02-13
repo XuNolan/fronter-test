@@ -79,8 +79,8 @@ public class UsecaseServiceImpl implements UsecaseService {
         List<UsecaseDisplayListVo> result = new ArrayList<>();
         //先找usecase；
         List<Usecase> usecases;
-        if(param.getKeyword()!=null){
-            usecases = usecaseRepository.findAllByNameContains(param.getKeyword());
+        if(param.getKeywords()!=null){
+            usecases = usecaseRepository.findAllByNameContains(param.getKeywords());
         } else {
             usecases = usecaseRepository.findAll();
         }
