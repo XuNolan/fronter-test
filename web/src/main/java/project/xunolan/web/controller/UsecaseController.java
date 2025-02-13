@@ -3,6 +3,7 @@ package project.xunolan.web.controller;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import project.xunolan.database.entity.Script;
 import project.xunolan.database.entity.Usecase;
@@ -33,8 +34,9 @@ public class UsecaseController {
                 .description(usecaseInsertVo.getUsecaseDescription())
                 .build();
         Script script = Script.builder()
-                .name(usecaseInsertVo.getScriptName()).
-                description(StrUtil.isEmpty(usecaseInsertVo.getScriptDescription())?"":usecaseInsertVo.getScriptDescription())
+                .name(usecaseInsertVo.getScriptName())
+                .data(usecaseInsertVo.getScriptData())
+                .description(StrUtil.isEmpty(usecaseInsertVo.getScriptDescription())?"":usecaseInsertVo.getScriptDescription())
                 .version(usecaseInsertVo.getScriptVersion()).build();
         usecaseService.save(usecase, script);
     }
@@ -62,8 +64,8 @@ public class UsecaseController {
     }
 
 
-    @DeleteMapping("/delete/{id}")
-    public void deleteById(@PathVariable("id") Long id){
+    @DeleteMapping("/delete")
+    public void deleteById(@RequestParam("id") Long id){
         usecaseService.deleteById(id);
     }
 

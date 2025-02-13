@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import project.xunolan.database.entity.ExecuteLog;
 import project.xunolan.database.entity.Script;
 import project.xunolan.database.entity.Usecase;
@@ -32,6 +33,7 @@ public class UsecaseServiceImpl implements UsecaseService {
     private ExecuteLogRepository executeLogRepository;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void save(Usecase usecase,  Script script) {
         //新增script和usecase；
         usecase.setCreated(Math.toIntExact(DateUtil.currentSeconds()));
@@ -57,6 +59,7 @@ public class UsecaseServiceImpl implements UsecaseService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         //todo:未来执行组中，无执行组信息才允许删除。
         List<Script> scripts = scriptRepository.findAllByUsecaseId(id);

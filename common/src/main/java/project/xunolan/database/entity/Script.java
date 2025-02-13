@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
@@ -17,6 +19,7 @@ import javax.persistence.Id;
 @Accessors(chain = true)
 public class Script {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     Long usecaseId;
     String name;
