@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,6 +42,7 @@ public class WebSocketServer {
     @OnClose
     public void onClose(Session session, CloseReason closeReason) {
         log.info("websocket close: id {}, reason {}", session.getId(), closeReason);
+        sessionMap.remove(session.getId());
     }
 
 }
