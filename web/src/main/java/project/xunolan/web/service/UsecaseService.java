@@ -2,7 +2,7 @@ package project.xunolan.web.service;
 
 import project.xunolan.database.entity.Script;
 import project.xunolan.database.entity.Usecase;
-import project.xunolan.common.entity.UsecaseDisplayListVo;
+import project.xunolan.web.amisRespVo.UsecaseDisplayListVo;
 import project.xunolan.web.amisRespVo.UsecaseFilterParam;
 
 import java.util.List;

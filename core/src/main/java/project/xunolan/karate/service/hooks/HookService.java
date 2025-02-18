@@ -1,8 +1,8 @@
-package project.xunolan.websocket.karateBridge.service.hooks;
+package project.xunolan.karate.service.hooks;
 
 import com.intuit.karate.RuntimeHook;
 import org.springframework.stereotype.Service;
-import project.xunolan.websocket.karateBridge.service.hooks.hookImpl.StepResultDisplayRuntimeHook;
+import project.xunolan.karate.service.hooks.hookImpl.StepResultDisplayRuntimeHook;
 
 import java.util.ArrayList;
 import java.util.List;

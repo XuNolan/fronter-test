@@ -1,4 +1,4 @@
-package project.xunolan.websocket.karateBridge.service;
+package project.xunolan.karate.service;
 
 import com.intuit.karate.Runner;
 import com.intuit.karate.Suite;
@@ -8,14 +8,14 @@ import com.intuit.karate.core.FeatureRuntime;
 import org.apache.tomcat.util.modeler.FeatureInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import project.xunolan.websocket.karateBridge.service.hooks.HookService;
+import project.xunolan.karate.service.hooks.HookService;
 
 import javax.websocket.Session;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class ProcessService {
+public class FeatureStartService {
 
     @Autowired
     HookService hookService;

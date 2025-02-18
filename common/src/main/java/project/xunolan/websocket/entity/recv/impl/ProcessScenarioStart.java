@@ -2,7 +2,7 @@ package project.xunolan.websocket.entity.recv.impl;
 
 import org.apache.tomcat.util.modeler.FeatureInfo;
 import project.xunolan.websocket.entity.recv.RecvMsgBase;
-import project.xunolan.websocket.karateBridge.service.ProcessService;
+import project.xunolan.karate.service.ProcessService;
 import project.xunolan.websocket.utils.BeanUtils;
 
 import javax.websocket.Session;

@@ -1,4 +1,4 @@
-package project.xunolan.websocket.karateBridge.service.hooks.hookImpl;
+package project.xunolan.karate.service.hooks.hookImpl;
 
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.core.*;

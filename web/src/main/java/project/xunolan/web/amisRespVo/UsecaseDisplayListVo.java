@@ -1,4 +1,4 @@
-package project.xunolan.common.entity;
+package project.xunolan.web.amisRespVo;
 
 
 import lombok.AllArgsConstructor;

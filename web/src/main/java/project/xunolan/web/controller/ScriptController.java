@@ -3,7 +3,7 @@ package project.xunolan.web.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import project.xunolan.common.entity.BasicResultVO;
-import project.xunolan.common.entity.ScriptDisplayListVo;
+import project.xunolan.web.amisRespVo.ScriptDisplayListVo;
 import project.xunolan.common.enums.RespStatusEnum;
 import project.xunolan.database.entity.Script;
 import project.xunolan.database.entity.Usecase;

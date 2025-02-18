@@ -1,11 +1,10 @@
-package project.xunolan.common.entity;
+package project.xunolan.web.amisRespVo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import project.xunolan.database.entity.Script;
-import project.xunolan.database.repository.ScriptRepository;
 
 
 @Builder
