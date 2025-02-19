@@ -3,6 +3,7 @@ package project.xunolan.web.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import project.xunolan.common.entity.BasicResultVO;
+import project.xunolan.service.ScriptService;
 import project.xunolan.web.amisRespVo.ScriptDisplayListVo;
 import project.xunolan.common.enums.RespStatusEnum;
 import project.xunolan.database.entity.Script;
@@ -11,7 +12,6 @@ import project.xunolan.web.amisRespVo.AmisCrudListVo;
 import project.xunolan.web.amisRespVo.ScriptFilterParam;
 import project.xunolan.web.amisRespVo.aspect.AmisResult;
 import project.xunolan.web.amisRespVo.utils.Convert4Amis;
-import project.xunolan.web.service.ScriptService;
 import project.xunolan.web.service.UsecaseService;
 import project.xunolan.web.testRespVo.ScriptTestInfo;
 
@@ -22,6 +22,7 @@ import java.util.Map;
 @AmisResult
 @RequestMapping("/script")
 public class ScriptController {
+
     @Autowired
     private ScriptService scriptService;
 

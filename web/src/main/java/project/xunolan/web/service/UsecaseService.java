@@ -7,7 +7,7 @@ import project.xunolan.web.amisRespVo.UsecaseFilterParam;
 
 import java.util.List;
 
-
+//todo: 搬移至common模块。返回信息和VO与DTO解耦。
 public interface UsecaseService {
     void save(Usecase usecase, Script script);
     Usecase update(Usecase usecase, Script script);

@@ -13,6 +13,7 @@ public class HookService {
     public List<RuntimeHook> getCommonHooks() {
         List<RuntimeHook> hooks = new ArrayList<>();
         hooks.add(new StepResultDisplayRuntimeHook());
+        //可以添加其他hooks；
         return hooks;
     }
 }

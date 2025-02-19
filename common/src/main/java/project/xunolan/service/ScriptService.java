@@ -1,6 +1,6 @@
-package project.xunolan.web.service;
+package project.xunolan.service;
 
-import org.springframework.stereotype.Service;
+
 import project.xunolan.database.entity.Script;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package project.xunolan.websocket.server.config;
+package project.xunolan.web.websocket.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

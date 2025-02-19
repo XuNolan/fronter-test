@@ -1,4 +1,4 @@
-package project.xunolan.web.service.impl;
+package project.xunolan.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.xunolan.database.entity.Script;
 import project.xunolan.database.repository.ScriptRepository;
-import project.xunolan.web.service.ScriptService;
+import project.xunolan.service.ScriptService;
 
 import java.util.List;
 

@@ -8,9 +8,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class BeanUtils implements ApplicationContextAware {
+    //主要用于，每次调用实例化后的实体对象里面autowire一个全局唯一的服务
     private static ApplicationContext applicationContext;
-
-
     /**
      * Spring容器会在创建该Bean之后，自动调用该Bean的setApplicationContext方法
      *
@@ -23,24 +22,19 @@ public class BeanUtils implements ApplicationContextAware {
         }
     }
 
-    //获取applicationContext
-    public static ApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
-
     //通过name获取 Bean.
     public static Object getBean(String name) {
-        return getApplicationContext().getBean(name);
+        return applicationContext.getBean(name);
     }
 
     //通过class获取Bean.
     public static <T> T getBean(Class<T> clazz) {
-        return getApplicationContext().getBean(clazz);
+        return applicationContext.getBean(clazz);
     }
 
     //通过name,以及Clazz返回指定的Bean
     public static <T> T getBean(String name, Class<T> clazz) {
-        return getApplicationContext().getBean(name, clazz);
+        return applicationContext.getBean(name, clazz);
     }
 
 }
