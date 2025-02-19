@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import project.xunolan.websocket.entity.send.impl.ExecuteResultInfo;
+import project.xunolan.websocket.entity.send.impl.KarateFeatureInfo;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -12,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 @AllArgsConstructor
 public enum SendMsgType {
     ExecuteInfoMsg(ExecuteResultInfo.class, "executeInfos"), //hasn't complete
-
+    KarateFeatureInfoMsg(KarateFeatureInfo.class, "KarateFeatureInfos"), //hasn't complete
     ;
     final Class<? extends SendMsgBase> classProto;
     final String msgType;

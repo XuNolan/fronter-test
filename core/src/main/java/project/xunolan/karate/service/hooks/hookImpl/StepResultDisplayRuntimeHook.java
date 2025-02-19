@@ -3,16 +3,23 @@ package project.xunolan.karate.service.hooks.hookImpl;
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.core.*;
 import lombok.extern.slf4j.Slf4j;
+import project.xunolan.karate.adapter.ScenarioInfo;
+import project.xunolan.karate.adapter.StepInfo;
 import project.xunolan.karate.service.FeatureStartService;
 import project.xunolan.websocket.entity.send.impl.ExecuteResultInfo;
+import project.xunolan.websocket.entity.send.impl.KarateFeatureInfo;
 import project.xunolan.websocket.queue.SocketPackage;
 
 import javax.websocket.Session;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Slf4j
 public class StepResultDisplayRuntimeHook implements RuntimeHook {
+    private int nowProcessScenarioIndex;
+    private int nowProcessStepIndex;
+
 
     public boolean beforeFeature(FeatureRuntime fr) {
         Session session = FeatureStartService.currentlyUseSession.get();
@@ -20,22 +27,52 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
             log.error("session is null");
             return false;
         }
-        //todo: 将要执行的step信息和编号传回给前端。
+
+        KarateFeatureInfo karateStepInfo = constructKarateFeatureInfo(fr);
+        SocketPackage.sendToExecuteLogQueue(new SocketPackage(session, karateStepInfo));
+        nowProcessScenarioIndex = -1;
         return true;
     }
 
+    @Override
+    public boolean beforeScenario(ScenarioRuntime sr) {
+        nowProcessScenarioIndex ++;
+        nowProcessStepIndex = -1;
+        return true;
+    }
 
     @Override
     public boolean beforeStep(Step step, ScenarioRuntime sr) {
+        nowProcessStepIndex++;
         return true;
     }
 
-
     @Override
     public void afterStep(StepResult stepResult, ScenarioRuntime sr) {
-        ExecuteResultInfo executeResultInfo = ExecuteResultInfo.fromResult(stepResult, sr);
+        ExecuteResultInfo executeResultInfo = ExecuteResultInfo.fromResult(nowProcessScenarioIndex, nowProcessStepIndex,stepResult);
         Session session = FeatureStartService.currentlyUseSession.get();
         SocketPackage.sendToExecuteLogQueue(new SocketPackage(session, executeResultInfo));
     }
+
+
+    private KarateFeatureInfo constructKarateFeatureInfo(FeatureRuntime fr) {
+        List<ScenarioInfo> scenarios = new ArrayList<>();
+        Iterator<ScenarioRuntime> scenarioRuntimeIterator = new ScenarioIterator(fr).filterSelected().iterator(); //与FreatureRuntime构造函数中的Iterator<ScenarioRuntime>初始化一致。因为其final，用后无法重置，所以自行构造
+        int scenarioNum = 0;
+        while(scenarioRuntimeIterator.hasNext()){
+            ScenarioRuntime scenarioRuntime = scenarioRuntimeIterator.next();
+            List<StepInfo> stepInfos = new ArrayList<>();
+            scenarioRuntime.scenario.getSteps().stream().map(step -> stepInfos.add(new StepInfo(step.getIndex(), step.getText())));
+            ScenarioInfo scenarioInfo = ScenarioInfo.builder()
+                    .index(scenarioNum)
+                    .scenarioName(scenarioRuntime.scenario.getName())
+                    .stepInfos(stepInfos)
+                    .build();
+            scenarios.add(scenarioInfo);
+            scenarioNum++;
+        }
+        return new KarateFeatureInfo(scenarios);
+    }
+
 
 }

@@ -26,7 +26,21 @@ public class WebsocketSendExecutor implements CommandLineRunner {
             while(!Thread.interrupted()) {
                 try{
                     SocketPackage socketPackage = SocketPackage.takeFromExecuteLogQueue();
-                    threadPoolUtils.getInstance().execute(()->{
+                    threadPoolUtils.getExecuteLogExecutor().execute(()->{
+                        WebSocketServer.OnSend(socketPackage.session, (SendEntity) socketPackage.sendEntity);
+                        log.info("send package, sessionId {}, msg {}", socketPackage.session, socketPackage.sendEntity);
+                    });
+                } catch (InterruptedException e) {
+                    log.error("send package thread err, {}", e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+        Runnable processScenarioInfo = ()->{
+            while(!Thread.interrupted()) {
+                try{
+                    SocketPackage socketPackage = SocketPackage.takeFromExecuteLogQueue();
+                    threadPoolUtils.getScenarioInfoExecutor().execute(()->{
                         WebSocketServer.OnSend(socketPackage.session, (SendEntity) socketPackage.sendEntity);
                         log.info("send package, sessionId {}, msg {}", socketPackage.session, socketPackage.sendEntity);
                     });
@@ -37,5 +51,6 @@ public class WebsocketSendExecutor implements CommandLineRunner {
             }
         };
         Executors.newSingleThreadExecutor().execute(processExecuteLog);
+        Executors.newSingleThreadExecutor().execute(processScenarioInfo);
     }
 }

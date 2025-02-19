@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import project.xunolan.websocket.service.entity.recv.impl.Heartbeat;
 import project.xunolan.websocket.entity.recv.impl.ProcessScriptStart;
 
 @ToString

@@ -1,11 +1,13 @@
 # 2.19
-1. 基于ThreadLocal向执行线程的回调传入需要返回的session信息；（已实现）
-2. 将script的data（raw text）与实际解析后的step信息相分离。以确保执行的step信息在展示上和执行结果信息对齐（都来自karate）。在StepResultDisplayRuntimeHook中进行进一步实现。
+[ x ] 基于ThreadLocal向执行线程的回调传入需要返回的session信息；（已实现）
+[ x ] 将script的data（raw text）与实际解析后的step信息相分离。以确保执行的step信息在展示上和执行结果信息对齐（都来自karate）。在StepResultDisplayRuntimeHook中进行进一步实现。
     前者在点击测试后通过http请求-响应传回去；
     后者在执行Feature回调的时候、在karate解析得到step后传回去。
-    执行结果信息在step回调传回去。（未完成，需要重新设计一下前端的界面）
+    执行结果信息在step回调传回去。
     data为完整的karate feature脚本。
-3. 发现没有必要使用心跳，删除了心跳。
+[ x ] 发现没有必要使用心跳，删除了心跳。
+
+开始修改前端部分的展示逻辑并对接后端实体；
 
 # 2.18
 修改此前逻辑，引入发送缓存。
