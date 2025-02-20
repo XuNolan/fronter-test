@@ -3,6 +3,7 @@ package project.xunolan.websocket.entity.send.impl;
 import com.intuit.karate.core.Result;
 import com.intuit.karate.core.ScenarioRuntime;
 import com.intuit.karate.core.StepResult;
+import project.xunolan.websocket.entity.send.SendEntity;
 import project.xunolan.websocket.entity.send.SendMsgBase;
 
 
@@ -18,13 +19,13 @@ private final String status;
     private final long startTime;
     private final long endTime;
  */
-    private final int scenarioIndex;
-    private final int stepIndex;
-    private final long durationNanos;
-    private final boolean aborted;
-    private final String error;
-    private final long startTime;
-    private final long endTime;
+    public final int scenarioIndex;
+    public final int stepIndex;
+    public final long durationNanos;
+    public final boolean aborted;
+    public final String error;
+    public final long startTime;
+    public final long endTime;
 
     public ExecuteResultInfo(int scenarioIndex, int stepIndex, long durationNanos, boolean aborted, String error,long startTime, long endTime) {
         this.scenarioIndex = scenarioIndex;

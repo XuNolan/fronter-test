@@ -34,7 +34,7 @@ public class FeatureStartService {
     private void RunKarateFeature(Feature feature, Session session){
         currentlyUseSession.set(session);
         FeatureCall featureCall = new FeatureCall(feature);
-        Runner.Builder customizeBuilder = Runner.builder().hooks(hookService.getCommonHooks()).forTempUse();
+        Runner.Builder customizeBuilder = Runner.builder().hooks(hookService.getCommonHooks());
         //设置forTempUse，为了使当前线程与实际FeatureRuntime执行线程在同一线程中，使得ThreadLocal有效。
 
         //这里可以存放多个featureCall。

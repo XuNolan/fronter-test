@@ -10,7 +10,7 @@ import project.xunolan.websocket.entity.recv.impl.ProcessScriptStart;
 @Getter
 @AllArgsConstructor
 public enum RecvMsgType {
-    script_start(ProcessScriptStart.class, "SCRIPTSTART"),
+    script_start(ProcessScriptStart.class, "script_start"),
     ;
 
     final Class<? extends RecvMsgBase> classProto;

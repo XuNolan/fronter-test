@@ -6,8 +6,9 @@ import project.xunolan.websocket.entity.send.SendMsgBase;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class KarateFeatureInfo extends SendMsgBase {
-    private List<ScenarioInfo> scenarioInfos = new ArrayList<>();
+    public List<ScenarioInfo> scenarioInfos = new ArrayList<>();
     public KarateFeatureInfo(List<ScenarioInfo> scenarioInfos){
         this.scenarioInfos.addAll(scenarioInfos);
     }

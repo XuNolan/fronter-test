@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 @AllArgsConstructor
 public enum SendMsgType {
     ExecuteInfoMsg(ExecuteResultInfo.class, "executeInfos"), //hasn't complete
-    KarateFeatureInfoMsg(KarateFeatureInfo.class, "KarateFeatureInfos"), //hasn't complete
+    KarateFeatureInfoMsg(KarateFeatureInfo.class, "karateFeatureInfos"), //hasn't complete
     ;
     final Class<? extends SendMsgBase> classProto;
     final String msgType;

@@ -1,11 +1,14 @@
 package project.xunolan.karate.service.hooks.hookImpl;
 
+import com.alibaba.fastjson.JSON;
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.core.*;
 import lombok.extern.slf4j.Slf4j;
 import project.xunolan.karate.adapter.ScenarioInfo;
 import project.xunolan.karate.adapter.StepInfo;
 import project.xunolan.karate.service.FeatureStartService;
+import project.xunolan.websocket.entity.send.SendEntity;
+import project.xunolan.websocket.entity.send.SendMsgType;
 import project.xunolan.websocket.entity.send.impl.ExecuteResultInfo;
 import project.xunolan.websocket.entity.send.impl.KarateFeatureInfo;
 import project.xunolan.websocket.queue.SocketPackage;
@@ -29,7 +32,7 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         }
 
         KarateFeatureInfo karateStepInfo = constructKarateFeatureInfo(fr);
-        SocketPackage.sendToExecuteLogQueue(new SocketPackage(session, karateStepInfo));
+        SocketPackage.sendToScenarioInfoQueue(new SocketPackage(session, JSON.toJSONString(new SendEntity(SendMsgType.KarateFeatureInfoMsg.getMsgType(), JSON.toJSONString(karateStepInfo)))));
         nowProcessScenarioIndex = -1;
         return true;
     }
@@ -51,7 +54,7 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
     public void afterStep(StepResult stepResult, ScenarioRuntime sr) {
         ExecuteResultInfo executeResultInfo = ExecuteResultInfo.fromResult(nowProcessScenarioIndex, nowProcessStepIndex,stepResult);
         Session session = FeatureStartService.currentlyUseSession.get();
-        SocketPackage.sendToExecuteLogQueue(new SocketPackage(session, executeResultInfo));
+        SocketPackage.sendToExecuteLogQueue(new SocketPackage(session, JSON.toJSONString(new SendEntity(SendMsgType.ExecuteInfoMsg.getMsgType(), JSON.toJSONString(executeResultInfo)))));
     }
 
 
@@ -62,7 +65,7 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         while(scenarioRuntimeIterator.hasNext()){
             ScenarioRuntime scenarioRuntime = scenarioRuntimeIterator.next();
             List<StepInfo> stepInfos = new ArrayList<>();
-            scenarioRuntime.scenario.getSteps().stream().map(step -> stepInfos.add(new StepInfo(step.getIndex(), step.getText())));
+            scenarioRuntime.scenario.getSteps().forEach(step -> stepInfos.add(new StepInfo(step.getIndex(), step.getPrefix() + " " + step.getText())));
             ScenarioInfo scenarioInfo = ScenarioInfo.builder()
                     .index(scenarioNum)
                     .scenarioName(scenarioRuntime.scenario.getName())

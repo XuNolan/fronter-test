@@ -13,7 +13,7 @@ public class SocketPackage {
 
     public Session session;
 
-    public Object sendEntity;
+    public String sendEntity;
 
     public static final BlockingQueue<SocketPackage> executeLogQueue = new LinkedBlockingQueue<>(65535);
     public static final BlockingQueue<SocketPackage> scenarioInfoQueue = new LinkedBlockingQueue<>(65535);

@@ -25,6 +25,7 @@ public class WebSocketServer {
     @OnMessage
     public void onMessage(String message, Session session) {
         log.info("message received: {}", message);
+        OnRecv(session, message);
     }
 
     @OnError
@@ -39,6 +40,7 @@ public class WebSocketServer {
 
     public static void OnRecv(Session session, String message) {
         RecvEntity recvEntity = JSON.parseObject(message, RecvEntity.class);
+        if(recvEntity.getMsgType().equals("heartbeat")) return;
         RecvMsgBase recvMsgBase = RecvMsgType.parseRawContent(recvEntity.getContent(), recvEntity.getMsgType());
         if(recvMsgBase != null) {
             recvMsgBase.processMsg(session);
@@ -47,11 +49,11 @@ public class WebSocketServer {
         }
     }
 
-    public static void OnSend(Session session, SendEntity sendEntity) {
+    public static void OnSend(Session session, String sendEntityJson) {
         try {
-            session.getBasicRemote().sendText(JSON.toJSONString(sendEntity));
+            session.getBasicRemote().sendText(sendEntityJson);
         } catch (IOException e) {
-            log.error("send message error ,type : {} , message content: {}, error info :{} ",sendEntity.msgType, sendEntity.content, e.getMessage());
+            log.error("send message error ,message: {}, error info :{} ",sendEntityJson, e.getMessage());
         }
     }
 }

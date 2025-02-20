@@ -1,5 +1,6 @@
 package project.xunolan.web.websocket;
 
+import cn.hutool.core.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,7 @@ public class WebsocketSendExecutor implements CommandLineRunner {
                 try{
                     SocketPackage socketPackage = SocketPackage.takeFromExecuteLogQueue();
                     threadPoolUtils.getExecuteLogExecutor().execute(()->{
-                        WebSocketServer.OnSend(socketPackage.session, (SendEntity) socketPackage.sendEntity);
+                        WebSocketServer.OnSend(socketPackage.session, socketPackage.sendEntity);
                         log.info("send package, sessionId {}, msg {}", socketPackage.session, socketPackage.sendEntity);
                     });
                 } catch (InterruptedException e) {
@@ -39,9 +40,9 @@ public class WebsocketSendExecutor implements CommandLineRunner {
         Runnable processScenarioInfo = ()->{
             while(!Thread.interrupted()) {
                 try{
-                    SocketPackage socketPackage = SocketPackage.takeFromExecuteLogQueue();
+                    SocketPackage socketPackage = SocketPackage.takeFromScenarioInfoQueue();
                     threadPoolUtils.getScenarioInfoExecutor().execute(()->{
-                        WebSocketServer.OnSend(socketPackage.session, (SendEntity) socketPackage.sendEntity);
+                        WebSocketServer.OnSend(socketPackage.session, socketPackage.sendEntity);
                         log.info("send package, sessionId {}, msg {}", socketPackage.session, socketPackage.sendEntity);
                     });
                 } catch (InterruptedException e) {
