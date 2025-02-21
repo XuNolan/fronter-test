@@ -1,5 +1,6 @@
 package project.xunolan.websocket.queue;
 
+import lombok.Getter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -8,42 +9,31 @@ import java.util.Objects;
 @Component
 public class ThreadPoolUtils {
 
+    @Getter
     private static volatile ThreadPoolTaskExecutor executeLogExecutor;
+    @Getter
     private static volatile ThreadPoolTaskExecutor scenarioInfoExecutor;
 
-    public ThreadPoolTaskExecutor getExecuteLogExecutor() {
-        if (Objects.isNull(executeLogExecutor)) {
-            synchronized (this) {
-                if (Objects.isNull(executeLogExecutor)) {
-                    executeLogExecutor = new ThreadPoolTaskExecutor();
-                    executeLogExecutor.setCorePoolSize(4);
-                    executeLogExecutor.setMaxPoolSize(4);
-                    executeLogExecutor.setQueueCapacity(65535);
-                    executeLogExecutor.setKeepAliveSeconds(60);
-                    executeLogExecutor.setThreadNamePrefix("thread-");
-                    executeLogExecutor.setDaemon(true);
-                    executeLogExecutor.initialize();
-                }
-            }
-        }
-        return executeLogExecutor;
+
+    private static final int small_thread_core_pool_size = 4;
+    private static final int small_thread_max_pool_size = 4;
+    private static final int small_queue_capacity = 512;
+    private static final int large_queue_capacity = 65535;
+
+    private static ThreadPoolTaskExecutor initQueueSendExecutor(String threadNamePrefix){
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+        threadPoolTaskExecutor.setCorePoolSize(small_thread_core_pool_size);
+        threadPoolTaskExecutor.setMaxPoolSize(small_thread_max_pool_size);
+        threadPoolTaskExecutor.setQueueCapacity(large_queue_capacity);
+        threadPoolTaskExecutor.setKeepAliveSeconds(60);
+        threadPoolTaskExecutor.setThreadNamePrefix(threadNamePrefix);
+        threadPoolTaskExecutor.setDaemon(true);
+        threadPoolTaskExecutor.initialize();
+        return threadPoolTaskExecutor;
     }
 
-    public ThreadPoolTaskExecutor getScenarioInfoExecutor() {
-        if (Objects.isNull(scenarioInfoExecutor)) {
-            synchronized (this) {
-                if (Objects.isNull(scenarioInfoExecutor)) {
-                    scenarioInfoExecutor = new ThreadPoolTaskExecutor();
-                    scenarioInfoExecutor.setCorePoolSize(4);
-                    scenarioInfoExecutor.setMaxPoolSize(4);
-                    scenarioInfoExecutor.setQueueCapacity(65535);
-                    scenarioInfoExecutor.setKeepAliveSeconds(60);
-                    scenarioInfoExecutor.setThreadNamePrefix("thread-");
-                    scenarioInfoExecutor.setDaemon(true);
-                    scenarioInfoExecutor.initialize();
-                }
-            }
-        }
-        return scenarioInfoExecutor;
+    static {
+        executeLogExecutor = initQueueSendExecutor("executeLog");
+        scenarioInfoExecutor = initQueueSendExecutor("scenarioInfo");
     }
 }

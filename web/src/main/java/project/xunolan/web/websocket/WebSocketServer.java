@@ -50,8 +50,11 @@ public class WebSocketServer {
     }
 
     public static void OnSend(Session session, String sendEntityJson) {
+        if(session == null || !session.isOpen()) return;
         try {
-            session.getBasicRemote().sendText(sendEntityJson);
+            synchronized (session){
+                session.getBasicRemote().sendText(sendEntityJson);
+            }
         } catch (IOException e) {
             log.error("send message error ,message: {}, error info :{} ",sendEntityJson, e.getMessage());
         }
