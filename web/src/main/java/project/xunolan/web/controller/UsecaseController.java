@@ -1,18 +1,19 @@
 package project.xunolan.web.controller;
 
+
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import project.xunolan.database.entity.Script;
 import project.xunolan.database.entity.Usecase;
-import project.xunolan.web.amisRespVo.UsecaseDisplayListVo;
-import project.xunolan.web.amisRespVo.UsecaseInsertVo;
-import project.xunolan.web.amisRespVo.aspect.AmisResult;
-import project.xunolan.web.amisRespVo.utils.Convert4Amis;
-import project.xunolan.web.service.UsecaseService;
-import project.xunolan.web.amisRespVo.UsecaseFilterParam;
-import project.xunolan.web.amisRespVo.AmisCrudListVo;
+import project.xunolan.service.UsecaseService;
+import project.xunolan.web.amisEntity.entity.AmisCrudListVo;
+import project.xunolan.web.amisEntity.entity.usecaseVo.UsecaseDisplayListVo;
+import project.xunolan.web.amisEntity.entity.params.UsecaseFilterParam;
+import project.xunolan.web.amisEntity.entity.usecaseVo.UsecaseInsertVo;
+import project.xunolan.web.amisEntity.aspect.AmisResult;
+import project.xunolan.web.amisEntity.utils.Convert4Amis;
 
 import java.util.List;
 import java.util.Map;

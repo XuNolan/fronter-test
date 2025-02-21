@@ -1,25 +1,24 @@
-package project.xunolan.web.amisRespVo;
+package project.xunolan.web.amisEntity.entity.params;
 
 import com.sun.istack.NotNull;
 import lombok.*;
 
+/*
+   用例首页的脚本crud参数
+ */
 @Data
 @Builder
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScriptFilterParam {
+public class UsecaseFilterParam {
 
-    //当前页码
     @NotNull
     private Integer page = 1;
 
-    //当前页大小
     @NotNull
     private Integer perPage = 10;
 
-    private String keyword;
+    private String keywords;
 
-    @NotNull
-    private Long usecaseId;
 }

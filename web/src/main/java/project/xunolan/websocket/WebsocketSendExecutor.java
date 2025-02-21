@@ -1,4 +1,4 @@
-package project.xunolan.web.websocket;
+package project.xunolan.websocket;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -35,7 +35,7 @@ public class WebsocketSendExecutor implements CommandLineRunner {
             while(!Thread.interrupted()) {
                 try{
                     SocketPackage socketPackage = SocketPackage.takeFromScenarioInfoQueue();
-                    ThreadPoolUtils.getScenarioInfoExecutor().execute(()->{ //todo：锁。且需要判断session未关闭。
+                    ThreadPoolUtils.getScenarioInfoExecutor().execute(()->{
                         WebSocketServer.OnSend(socketPackage.session, socketPackage.sendEntity);
                         log.info("send ScenarioInfo package, sessionId {}, msg {}", socketPackage.session, socketPackage.sendEntity);
                     });

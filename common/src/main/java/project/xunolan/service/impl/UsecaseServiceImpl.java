@@ -1,4 +1,4 @@
-package project.xunolan.web.service.impl;
+package project.xunolan.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +11,9 @@ import project.xunolan.database.entity.Usecase;
 import project.xunolan.database.repository.ExecuteLogRepository;
 import project.xunolan.database.repository.ScriptRepository;
 import project.xunolan.database.repository.UsecaseRepository;
-import project.xunolan.web.amisRespVo.UsecaseDisplayListVo;
+import project.xunolan.web.amisEntity.UsecaseDisplayListVo;
 import project.xunolan.web.service.UsecaseService;
-import project.xunolan.web.amisRespVo.UsecaseFilterParam;
+import project.xunolan.web.amisEntity.UsecaseFilterParam;
 
 import java.util.*;
 

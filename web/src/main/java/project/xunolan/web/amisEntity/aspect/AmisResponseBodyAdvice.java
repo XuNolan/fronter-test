@@ -1,4 +1,4 @@
-package project.xunolan.web.amisRespVo.aspect;
+package project.xunolan.web.amisEntity.aspect;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;

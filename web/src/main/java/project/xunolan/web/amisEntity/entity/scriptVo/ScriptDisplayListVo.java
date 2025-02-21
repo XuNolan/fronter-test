@@ -1,4 +1,4 @@
-package project.xunolan.web.amisRespVo;
+package project.xunolan.web.amisEntity.entity.scriptVo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import project.xunolan.database.entity.Script;
 
-
+/*
+   用例详情页中的脚本增删改查组件返回的信息；
+ */
 @Builder
 @Data
 @AllArgsConstructor

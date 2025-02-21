@@ -1,4 +1,4 @@
-package project.xunolan.web.amisRespVo;
+package project.xunolan.web.amisEntity.entity.usecaseVo;
 
 
 import lombok.AllArgsConstructor;
@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+/*
+   用例的增删改查组件返回的信息；
+ */
 @Builder
 @Data
 @AllArgsConstructor

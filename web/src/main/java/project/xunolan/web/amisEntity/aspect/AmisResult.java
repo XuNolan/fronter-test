@@ -1,4 +1,4 @@
-package project.xunolan.web.amisRespVo.aspect;
+package project.xunolan.web.amisEntity.aspect;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

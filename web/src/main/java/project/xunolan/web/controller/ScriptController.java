@@ -4,16 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import project.xunolan.common.entity.BasicResultVO;
 import project.xunolan.service.ScriptService;
-import project.xunolan.web.amisRespVo.ScriptDisplayListVo;
+import project.xunolan.web.amisEntity.entity.scriptVo.ScriptDisplayListVo;
 import project.xunolan.common.enums.RespStatusEnum;
 import project.xunolan.database.entity.Script;
 import project.xunolan.database.entity.Usecase;
-import project.xunolan.web.amisRespVo.AmisCrudListVo;
-import project.xunolan.web.amisRespVo.ScriptFilterParam;
-import project.xunolan.web.amisRespVo.aspect.AmisResult;
-import project.xunolan.web.amisRespVo.utils.Convert4Amis;
-import project.xunolan.web.service.UsecaseService;
-import project.xunolan.web.testRespVo.ScriptTestInfo;
+import project.xunolan.web.amisEntity.entity.AmisCrudListVo;
+import project.xunolan.web.amisEntity.entity.params.ScriptFilterParam;
+import project.xunolan.web.amisEntity.aspect.AmisResult;
+import project.xunolan.web.amisEntity.utils.Convert4Amis;
+import project.xunolan.service.UsecaseService;
+import project.xunolan.web.amisEntity.entity.scriptVo.ScriptTestInfoVo;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,7 @@ import java.util.Map;
 @AmisResult
 @RequestMapping("/script")
 public class ScriptController {
+    //返回要flat的对象。flat本身在切面中完成。
 
     @Autowired
     private ScriptService scriptService;
@@ -78,14 +79,14 @@ public class ScriptController {
     public Map<String, Object> getTestInfo(@RequestParam("scriptId") Long scriptId){
         Script script = scriptService.queryScriptByScriptId(scriptId);
         Usecase usecase = usecaseService.queryById(script.getUsecaseId());
-        ScriptTestInfo scriptTestInfo = ScriptTestInfo.builder()
+        ScriptTestInfoVo scriptTestInfoVo = ScriptTestInfoVo.builder()
                 .usecaseName(usecase.getName())
                 .usecaseDescription(usecase.getDescription())
                 .scriptName(script.getName())
                 .scriptDescription(script.getDescription())
                 .version(script.getVersion())
                 .data(script.getData()).build();
-        return Convert4Amis.flatSingleMap(scriptTestInfo);
+        return Convert4Amis.flatSingleMap(scriptTestInfoVo);
     }
 
 }

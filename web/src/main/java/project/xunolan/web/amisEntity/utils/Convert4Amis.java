@@ -1,4 +1,4 @@
-package project.xunolan.web.amisRespVo.utils;
+package project.xunolan.web.amisEntity.utils;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ReflectUtil;

@@ -1,4 +1,4 @@
-package project.xunolan.web.websocket;
+package project.xunolan.websocket;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;

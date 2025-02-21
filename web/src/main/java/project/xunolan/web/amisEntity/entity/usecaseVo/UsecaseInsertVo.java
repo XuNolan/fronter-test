@@ -1,7 +1,11 @@
-package project.xunolan.web.amisRespVo;
+package project.xunolan.web.amisEntity.entity.usecaseVo;
 
 import lombok.Data;
 import lombok.Getter;
+
+/*
+    插入用例的信息。
+ */
 
 @Data
 @Getter
