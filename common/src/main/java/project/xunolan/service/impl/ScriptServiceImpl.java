@@ -57,4 +57,8 @@ public class ScriptServiceImpl implements ScriptService {
     public void deActiveScript(Long scriptId) {
         scriptRepository.deactive(scriptId);
     }
+
+    public Script findOneByUsecaseIdAndIsActive(Long usecaseId, Boolean isActive) {
+        return scriptRepository.findOneByUsecaseIdAndIsActive(usecaseId, isActive);
+    }
 }

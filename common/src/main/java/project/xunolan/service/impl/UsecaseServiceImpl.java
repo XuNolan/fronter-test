@@ -2,6 +2,7 @@ package project.xunolan.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,9 +12,8 @@ import project.xunolan.database.entity.Usecase;
 import project.xunolan.database.repository.ExecuteLogRepository;
 import project.xunolan.database.repository.ScriptRepository;
 import project.xunolan.database.repository.UsecaseRepository;
-import project.xunolan.web.amisEntity.UsecaseDisplayListVo;
-import project.xunolan.web.service.UsecaseService;
-import project.xunolan.web.amisEntity.UsecaseFilterParam;
+import project.xunolan.service.UsecaseService;
+
 
 import java.util.*;
 
@@ -69,36 +69,12 @@ public class UsecaseServiceImpl implements UsecaseService {
         usecaseRepository.deleteById(id);
     }
 
-    @Override
-    public List<UsecaseDisplayListVo> queryList(UsecaseFilterParam param) {
-
-        //需要根据usecaseFilterParam筛选相关方法
-        PageRequest pageRequest = PageRequest.of(param.getPage() - 1, param.getPerPage());
-        List<UsecaseDisplayListVo> result = new ArrayList<>();
-        //先找usecase；
-        List<Usecase> usecases;
-        if(param.getKeywords()!=null){
-            usecases = usecaseRepository.findAllByNameContains(param.getKeywords());
+    public Page<Usecase> findAllByKeywordAndPageParam(String keyword, int curPage, int pageSize) {
+        if(keyword != null) {
+            return usecaseRepository.findByNameContainsOrderByIdAsc(keyword, PageRequest.of(curPage, pageSize));
         } else {
-            usecases = usecaseRepository.findAll();
+            return usecaseRepository.findAllByOrderByIdAsc(PageRequest.of(curPage, pageSize));
         }
-        for(Usecase usecase : usecases){
-            Long usecaseId = usecase.getId();
-            Script activeScript = scriptRepository.findOneByUsecaseIdAndIsActive(usecase.getId(), true);
-            ExecuteLog executeLog = null;
-            if(activeScript != null){
-                executeLog = executeLogRepository.findFirstByScriptIdOrderByExecuteTimeDesc(activeScript.getId());
-            }
-            result.add(UsecaseDisplayListVo.builder()
-                    .id(String.valueOf(usecaseId))
-                    .usecaseName(usecase.getName())
-                    .usecaseDescription(usecase.getDescription())
-                    .scriptName(activeScript == null? null:activeScript.getName())
-                    .scriptDescription(activeScript == null? null:activeScript.getDescription())
-                    .version(activeScript == null? null:activeScript.getVersion())
-                    .lastExecuteTime(String.valueOf(executeLog == null? null: executeLog.getExecuteTime()))
-                    .status(executeLog == null? 0 : executeLog.getStatus()).build());
-        }
-        return result;
     }
+
 }
