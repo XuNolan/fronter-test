@@ -76,17 +76,16 @@ public class ScriptController {
 
 
     @GetMapping("/testInfo")
-    public Map<String, Object> getTestInfo(@RequestParam("scriptId") Long scriptId){
+    public ScriptTestInfoVo getTestInfo(@RequestParam("scriptId") Long scriptId){
         Script script = scriptService.queryScriptByScriptId(scriptId);
         Usecase usecase = usecaseService.queryById(script.getUsecaseId());
-        ScriptTestInfoVo scriptTestInfoVo = ScriptTestInfoVo.builder()
+        return ScriptTestInfoVo.builder()
                 .usecaseName(usecase.getName())
                 .usecaseDescription(usecase.getDescription())
                 .scriptName(script.getName())
                 .scriptDescription(script.getDescription())
                 .version(script.getVersion())
                 .data(script.getData()).build();
-        return Convert4Amis.flatSingleMap(scriptTestInfoVo);
     }
 
 }

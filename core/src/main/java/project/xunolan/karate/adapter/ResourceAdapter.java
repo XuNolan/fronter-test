@@ -35,7 +35,7 @@ public class ResourceAdapter implements Resource {
 
     @Override
     public String getRelativePath() {
-        return "";
+        return "tempFile.feature";
     }
 
     @Override
