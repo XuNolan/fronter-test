@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import project.xunolan.common.entity.BasicResultVO;
 import project.xunolan.service.ScriptService;
+import project.xunolan.web.amisEntity.entity.params.NewScriptDTO;
 import project.xunolan.web.amisEntity.entity.scriptVo.ScriptDisplayListVo;
 import project.xunolan.common.enums.RespStatusEnum;
 import project.xunolan.database.entity.Script;
@@ -55,8 +56,11 @@ public class ScriptController {
     }
 
     @PostMapping("/new")
-    public void newScript(@RequestBody Script script, @RequestParam("usecaseId") Long usecaseId) {
-        scriptService.newScript(script, usecaseId);
+    public void newScript(@RequestBody NewScriptDTO script, @RequestParam("usecaseId") Long usecaseId) {
+        scriptService.newScript(Script.builder().name(script.newScriptName)
+                .data(script.newScriptData)
+                .description(script.newScriptDescription)
+                .version(script.newScriptVersion).build(), usecaseId);
     }
 
     @GetMapping("/versionValidate")
