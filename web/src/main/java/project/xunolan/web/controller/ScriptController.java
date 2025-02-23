@@ -1,5 +1,6 @@
 package project.xunolan.web.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import project.xunolan.common.entity.BasicResultVO;
@@ -18,6 +19,7 @@ import project.xunolan.web.amisEntity.entity.scriptVo.ScriptTestInfoVo;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @AmisResult
 @RequestMapping("/script")
@@ -51,6 +53,16 @@ public class ScriptController {
     public Map<String, Object> queryScript(@PathVariable Long scriptId) {
         Script script = scriptService.queryScriptByScriptId(scriptId);
         return Convert4Amis.flatSingleMapWithPrefix("script", script);
+    }
+
+    @GetMapping("/query/{scriptId}")
+    public Script query(@PathVariable Long scriptId) {
+        return scriptService.queryScriptByScriptId(scriptId);
+    }
+
+    @PostMapping("/update/{scriptId}")
+    public Script update(@RequestBody Script script, @PathVariable Long scriptId) {
+        return scriptService.updateScript(script, scriptId);
     }
 
     @PostMapping("/new")

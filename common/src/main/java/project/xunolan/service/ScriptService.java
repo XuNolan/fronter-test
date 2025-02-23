@@ -16,4 +16,5 @@ public interface ScriptService {
     void deActiveScript(Long scriptId);
 
     Script findOneByUsecaseIdAndIsActive(Long usecaseId, Boolean isActive);
+    Script updateScript(Script script, Long scriptId);
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.xunolan.database.entity.Script;
+import project.xunolan.database.entity.Usecase;
 import project.xunolan.database.repository.ScriptRepository;
 import project.xunolan.service.ScriptService;
 
@@ -60,5 +61,22 @@ public class ScriptServiceImpl implements ScriptService {
 
     public Script findOneByUsecaseIdAndIsActive(Long usecaseId, Boolean isActive) {
         return scriptRepository.findOneByUsecaseIdAndIsActive(usecaseId, isActive);
+    }
+
+    @Override
+    public Script updateScript(Script script, Long scriptId) {
+        if(scriptId == null){
+            return null;
+        }
+        Script newScript = scriptRepository.findById(scriptId).orElse(null);
+        if(newScript == null){
+            return null;
+        }
+        newScript.setUpdated(Math.toIntExact(DateUtil.currentSeconds()));
+        newScript.setName(script.getName().isEmpty()? newScript.getName() : script.getName())
+                .setVersion(script.getVersion().isEmpty()? newScript.getVersion() : script.getVersion())
+                .setDescription(script.getDescription().isEmpty()? newScript.getDescription() : script.getDescription())
+                .setData(script.getData().isEmpty()? newScript.getData() : script.getData());
+        return scriptRepository.save(newScript);
     }
 }
