@@ -56,11 +56,8 @@ public class ScriptController {
     }
 
     @PostMapping("/new")
-    public void newScript(@RequestBody NewScriptDTO script, @RequestParam("usecaseId") Long usecaseId) {
-        scriptService.newScript(Script.builder().name(script.newScriptName)
-                .data(script.newScriptData)
-                .description(script.newScriptDescription)
-                .version(script.newScriptVersion).build(), usecaseId);
+    public void newScript(@RequestBody Script script, @RequestParam("usecaseId") Long usecaseId) {
+        scriptService.newScript(script, usecaseId);
     }
 
     @GetMapping("/versionValidate")
