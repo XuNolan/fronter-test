@@ -106,4 +106,10 @@ public class ScriptController {
                 .data(script.getData()).build();
     }
 
+    @DeleteMapping("/delete")
+    public void deleteScript(@RequestParam("scriptId") Long scriptId) {
+        if(scriptId == null) return;
+        scriptService.deleteScript(scriptId);
+    }
+
 }

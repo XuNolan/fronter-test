@@ -79,4 +79,9 @@ public class ScriptServiceImpl implements ScriptService {
                 .setData(script.getData().isEmpty()? newScript.getData() : script.getData());
         return scriptRepository.save(newScript);
     }
+
+    @Override
+    public void deleteScript(long scriptId) {
+        scriptRepository.deleteById(scriptId);
+    }
 }
