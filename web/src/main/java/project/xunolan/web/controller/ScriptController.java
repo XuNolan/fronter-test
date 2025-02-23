@@ -64,12 +64,13 @@ public class ScriptController {
         }
     }
 
-    @PostMapping("/active")
+    @GetMapping("/active")
     public void activeScript(@RequestParam("usecaseId") Long usecaseId, @RequestParam("scriptId") Long scriptId) {
+        if(usecaseId == null || scriptId == null) return;
         scriptService.activeScript(usecaseId, scriptId);
     }
 
-    @PostMapping("/deActive")
+    @GetMapping("/deActive")
     public void deActiveScript( @RequestParam("scriptId") Long scriptId) {
         scriptService.deActiveScript(scriptId);
     }
