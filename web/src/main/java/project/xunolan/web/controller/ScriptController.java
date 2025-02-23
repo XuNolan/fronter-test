@@ -17,6 +17,7 @@ import project.xunolan.web.amisEntity.entity.scriptVo.ScriptTestInfoVo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @AmisResult
@@ -33,6 +34,11 @@ public class ScriptController {
     @GetMapping("/list")
     public AmisCrudListVo queryDisplayList(ScriptFilterParam scriptFilterParam) {
         List<Script> scriptList = scriptService.queryListByUsecaseId(scriptFilterParam.getUsecaseId());
+        if (scriptFilterParam.getKeyword() != null && !scriptFilterParam.getKeyword().isEmpty()) {
+            scriptList = scriptList.stream()
+                    .filter(script -> script.getName().contains(scriptFilterParam.getKeyword()))
+                    .toList();
+        }
         List<ScriptDisplayListVo> scriptDisplayListVos = scriptList.stream()
                 .map(ScriptDisplayListVo::fromScript)
                 .toList();
