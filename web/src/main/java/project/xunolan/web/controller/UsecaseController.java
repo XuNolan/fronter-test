@@ -52,9 +52,9 @@ public class UsecaseController {
     }
 
     @AmisResult
-    @PostMapping("/update")
-    public Usecase update(){
-        return null;
+    @PostMapping("/update/{id}")
+    public Usecase update(@RequestBody Usecase usecase, @PathVariable("id") Long id){
+        return usecaseService.update(usecase, id);
     }
 
     @AmisResult

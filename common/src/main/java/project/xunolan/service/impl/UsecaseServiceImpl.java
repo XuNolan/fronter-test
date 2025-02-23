@@ -1,5 +1,6 @@
 package project.xunolan.service.impl;
 
+import antlr.StringUtils;
 import cn.hutool.core.date.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -47,8 +48,23 @@ public class UsecaseServiceImpl implements UsecaseService {
     }
 
     @Override
-    public Usecase update(Usecase usecase,  Script script) {
-        return null;
+    public Usecase update(Usecase usecase, Long id) {
+        if(id == null){
+            return null;
+        }
+        Usecase updateUsecase = usecaseRepository.findById(id).orElse(null);
+        if(updateUsecase == null){
+            return null;
+        }
+        //更新
+        updateUsecase.setUpdated(Math.toIntExact(DateUtil.currentSeconds()));
+        if(usecase.getName() != null){
+            updateUsecase.setName(usecase.getName());
+        }
+        if(usecase.getDescription() != null){
+            updateUsecase.setDescription(usecase.getDescription());
+        }
+        return usecaseRepository.save(updateUsecase);
     }
 
     @Override

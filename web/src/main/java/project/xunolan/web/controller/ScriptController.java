@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import project.xunolan.common.entity.BasicResultVO;
 import project.xunolan.service.ScriptService;
-import project.xunolan.web.amisEntity.entity.params.NewScriptDTO;
 import project.xunolan.web.amisEntity.entity.scriptVo.ScriptDisplayListVo;
 import project.xunolan.common.enums.RespStatusEnum;
 import project.xunolan.database.entity.Script;
@@ -18,7 +17,6 @@ import project.xunolan.web.amisEntity.entity.scriptVo.ScriptTestInfoVo;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @AmisResult
