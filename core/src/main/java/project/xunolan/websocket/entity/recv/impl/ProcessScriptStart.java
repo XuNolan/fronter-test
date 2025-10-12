@@ -20,6 +20,6 @@ public class ProcessScriptStart extends RecvMsgBase {
         ScriptService scriptService = BeanUtils.getBean(ScriptService.class);
         Script script = scriptService.queryScriptByScriptId(scriptId);
         FeatureStartService featureStartService = BeanUtils.getBean(FeatureStartService.class);
-        featureStartService.RunScript(session, script);
+        featureStartService.runScript(session, script);
     }
 }

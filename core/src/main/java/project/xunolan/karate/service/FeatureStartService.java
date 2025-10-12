@@ -3,6 +3,7 @@ package project.xunolan.karate.service;
 import com.intuit.karate.Runner;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
+import com.intuit.karate.resource.MemoryResource;
 import com.intuit.karate.resource.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,24 +32,14 @@ public class FeatureStartService {
     private static boolean useResource = false;
 
     private Feature resolveScript(Script script) {
-        File file;
         if(useResource){
-            return Feature.read(resolveByResource(script));
+            return resolveByResource(script);
         } else {
-           file = resolveByTempFile(script);
-            if(file == null){
-                log.error("resolve script file failed, file is empty");
-                return null;
-            }
-            Feature feature =  Feature.read(file);
-            if(!file.delete()){
-                log.error("Failed to delete file {}", file.getAbsolutePath());
-            }
-            return feature;
+            return resolveByTempFile(script);
         }
     }
 
-    private File resolveByTempFile(Script script){
+    private Feature resolveByTempFile(Script script){
         String resourcePath = "src/main/resources/tmp";
         File tmpDirectory = new File(resourcePath);
         // 确保 tmp 目录存在，如果不存在则创建
@@ -59,38 +50,52 @@ public class FeatureStartService {
             // 在 tmp 目录下创建一个临时文件
             Path tmpFilePath =  Files.createTempFile(tmpDirectory.toPath(), script.getUsecaseId() + "-" + script.getId(), ".feature");
             String scriptData = script.getData();
-            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(scriptData.getBytes(StandardCharsets.UTF_8))) {
-                Files.copy(byteArrayInputStream, tmpFilePath, StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                log.error(e.getMessage());
+            File file = tmpFilePath.toFile();
+            MemoryResource memoryResource = new MemoryResource(file, scriptData);
+            if(!file.delete()){
+                log.error("Failed to delete file {}", file.getAbsolutePath());
             }
-            return tmpFilePath.toFile();
+            return Feature.read(memoryResource);
         }catch (IOException e){
             log.error(e.getMessage());
             return null;
         }
     }
 
-    private Resource resolveByResource(Script script){
+    private Feature resolveByResource(Script script){
         String scriptData = script.getData();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(scriptData.getBytes(StandardCharsets.UTF_8));
-        return new ResourceAdapter(byteArrayInputStream);
-        //主要就是用在getStream。
+        return Feature.read(new ResourceAdapter(byteArrayInputStream));
     }
 
-    public void RunScript(Session session, Script script){
-        //基于script构造feature；
-        Feature feature = resolveScript(script);
-        if(feature == null){
-            return;
+    public void runScript(Session session, Script script) {
+        try {
+            //基于script构造feature；
+            Feature feature = resolveScript(script);
+            if (feature == null) {
+                return;
+            }
+            runKarateFeature(feature, session);
+        } catch (Exception e) {
+            log.error("Error running Karate feature", e);
+        } finally {
+            currentlyUseSession.remove();
         }
-        RunKarateFeature(feature, session);
     }
 
-    private void RunKarateFeature(Feature feature, Session session){
+    private void runKarateFeature(Feature feature, Session session){
         currentlyUseSession.set(session);
         FeatureCall featureCall = new FeatureCall(feature);
-        Runner.Builder customizeBuilder = Runner.builder().hooks(hookService.getCommonHooks());
+        Runner.Builder customizeBuilder = Runner.builder().hooks(hookService.getCommonHooks()) //保留配置hook
+                //显式设置单线程（确保 ThreadLocal 有效）
+                .threads(1)
+                //禁用所有报告功能。当前仅考虑性能？之后如果有生成报告需求的话可能要移出。
+                .outputHtmlReport(false)
+                .outputJunitXml(false)
+                .outputCucumberJson(false)
+                .backupReportDir(false)
+                //直接传入 Feature
+                .features(feature);
         //设置forTempUse，为了使当前线程与实际FeatureRuntime执行线程在同一线程中，使得ThreadLocal有效。
 
         //这里可以存放多个featureCall。
