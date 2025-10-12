@@ -17,6 +17,7 @@ public class AmisResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+        // 检查是否有 @AmisResult 注解
         return returnType.getContainingClass().isAnnotationPresent(AmisResult.class) || returnType.hasMethodAnnotation(AmisResult.class);
     }
 
@@ -25,6 +26,7 @@ public class AmisResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request, ServerHttpResponse response) {
         if (Objects.nonNull(body) && Objects.nonNull(body.getClass())) {
+            // 如果已经是 BasicResultVO，直接返回
             String simpleName = body.getClass().getSimpleName();
             if (RETURN_CLASS.equalsIgnoreCase(simpleName)) {
                 return body;
@@ -32,4 +34,10 @@ public class AmisResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         }
         return BasicResultVO.success(body);
     }
+    //转换效果为，将body包装为data成员内容，返回如下：
+    //{
+    //  "status": 0,
+    //  "msg": "",
+    //  "data": scriptList
+    //}
 }

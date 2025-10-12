@@ -10,7 +10,7 @@ import project.xunolan.websocket.utils.BeanUtils;
 
 import javax.websocket.Session;
 
-//收到的报文实例，并不适合交给spring管理，但又需要调用service。故使用bean获取srvice。
+//收到的报文实例，并不适合交给spring管理，但又需要调用service。故使用bean获取service。
 public class ProcessScriptStart extends RecvMsgBase {
     //执行单位为feature。
     public Long scriptId;

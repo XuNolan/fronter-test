@@ -34,15 +34,19 @@ public class ScriptController {
 
     @GetMapping("/list")
     public AmisCrudListVo queryDisplayList(ScriptFilterParam scriptFilterParam) {
+        // 1. 查询数据库
         List<Script> scriptList = scriptService.queryListByUsecaseId(scriptFilterParam.getUsecaseId());
+        // 2. 关键词过滤
         if (scriptFilterParam.getKeyword() != null && !scriptFilterParam.getKeyword().isEmpty()) {
             scriptList = scriptList.stream()
                     .filter(script -> script.getName().contains(scriptFilterParam.getKeyword()))
                     .toList();
         }
+        // 3. 转换为 VO
         List<ScriptDisplayListVo> scriptDisplayListVos = scriptList.stream()
                 .map(ScriptDisplayListVo::fromScript)
                 .toList();
+        // 4. 转换为 Amis 格式
         List<Map<String, Object>> items = Convert4Amis.createItemsMap(scriptDisplayListVos);
         return AmisCrudListVo.builder()
                 .total(scriptDisplayListVos.size())
@@ -91,7 +95,6 @@ public class ScriptController {
     public void deActiveScript( @RequestParam("scriptId") Long scriptId) {
         scriptService.deActiveScript(scriptId);
     }
-
 
     @GetMapping("/testInfo")
     public ScriptTestInfoVo getTestInfo(@RequestParam("scriptId") Long scriptId){
