@@ -153,6 +153,13 @@ public class ExecuteGroupController {
     @PostMapping("/create")
     public BasicResultVO<Long> createExecuteGroup(@RequestBody CreateGroupRequest request) {
         try {
+            // 验证组名长度
+            if (request.getGroupName() == null || request.getGroupName().trim().isEmpty()) {
+                return new BasicResultVO<>(RespStatusEnum.FAIL, "组名不能为空", null);
+            }
+            if (request.getGroupName().length() > 32) {
+                return new BasicResultVO<>(RespStatusEnum.FAIL, "组名长度不能超过32个字符", null);
+            }
             // 检查组名是否已存在
             if (executeGroupIdRepository.existsByGroupName(request.getGroupName())) {
                 return new BasicResultVO<>(RespStatusEnum.FAIL, "组名已存在", null);
@@ -254,6 +261,13 @@ public class ExecuteGroupController {
 
             // 更新基本信息
             if (request.getGroupName() != null && !request.getGroupName().equals(group.getGroupName())) {
+                // 验证组名长度
+                if (request.getGroupName().trim().isEmpty()) {
+                    return new BasicResultVO<>(RespStatusEnum.FAIL, "组名不能为空", null);
+                }
+                if (request.getGroupName().length() > 32) {
+                    return new BasicResultVO<>(RespStatusEnum.FAIL, "组名长度不能超过32个字符", null);
+                }
                 if (executeGroupIdRepository.existsByGroupName(request.getGroupName())) {
                     return new BasicResultVO<>(RespStatusEnum.FAIL, "组名已存在", null);
                 }
