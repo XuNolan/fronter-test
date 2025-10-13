@@ -43,7 +43,7 @@ public class UsecaseServiceImpl implements UsecaseService {
         script.setCreated(Math.toIntExact(DateUtil.currentSeconds()));
         script.setUpdated(Math.toIntExact(DateUtil.currentSeconds()));
         script.setUsecaseId(insertedUsecase.getId());
-        script.setActive(false);//提交之后默认不启用。
+        script.setIsActive(false);//提交之后默认不启用。
         scriptRepository.save(script);
     }
 

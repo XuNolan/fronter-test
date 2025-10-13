@@ -24,7 +24,7 @@ public class ScriptDisplayListVo {
                 .scriptId(script.getId())
                 .scriptName(script.getName())
                 .version(script.getVersion())
-                .isActive(script.isActive())
+                .isActive(script.getIsActive() != null && script.getIsActive())
                 .build();
     }
 }

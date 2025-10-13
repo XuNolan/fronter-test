@@ -29,7 +29,7 @@ public class ScriptServiceImpl implements ScriptService {
     @Override
     public void newScript(Script script, Long usecaseId) {
         script.setUsecaseId(usecaseId)
-                .setActive(false)
+                .setIsActive(false)
                 .setCreated(Math.toIntExact(DateUtil.currentSeconds()))
                 .setUpdated(Math.toIntExact(DateUtil.currentSeconds()));
         scriptRepository.save(script);
@@ -83,5 +83,20 @@ public class ScriptServiceImpl implements ScriptService {
     @Override
     public void deleteScript(long scriptId) {
         scriptRepository.deleteById(scriptId);
+    }
+
+    @Override
+    public List<Script> findAll() {
+        return scriptRepository.findAll();
+    }
+
+    @Override
+    public List<Script> findAllActiveScripts() {
+        return scriptRepository.findAllByIsActive(true);
+    }
+
+    @Override
+    public List<Script> findAllActiveScriptsOrdered() {
+        return scriptRepository.findAllActiveScriptsOrdered();
     }
 }
