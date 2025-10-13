@@ -8,37 +8,30 @@ import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
+/**
+ * 执行组与脚本关联信息实体
+ */
 @Entity
-@Table(name = "execute_log")
+@Table(name = "execute_group_script_related")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
-public class ExecuteLog {
+public class ExecuteGroupScriptRelated {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-
-    @Column(name = "usecase_id", nullable = false)
-    private Long usecaseId;
-
+    
+    @Column(name = "`index`", nullable = false)
+    private Long index;
+    
     @Column(name = "script_id", nullable = false)
     private Long scriptId;
-
-    @Column(name = "execute_group_id")
+    
+    @Column(name = "execute_group_id", nullable = false)
     private Long executeGroupId;
-
-    @Column(name = "log_data")
-    private String logData;
-
-    @Column(name = "record_id")
-    private Long recordId;
-
-    @Column(name = "execute_time", nullable = false)
-    private Integer executeTime;
-
-    @Column(name = "status", nullable = false)
-    private Integer status;
 }
+

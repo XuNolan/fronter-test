@@ -26,7 +26,7 @@ public class Script {
     String version;
     String description;
     String data;
-    boolean isActive;
+    Boolean isActive;  // 使用包装类型，Lombok 将生成 getIsActive() 方法
     int created;
     int updated;
 }
