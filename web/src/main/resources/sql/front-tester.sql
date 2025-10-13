@@ -1,5 +1,4 @@
 use front_tester;
-drop database front_tester;
 
 create table if not exists `usecase`
 (
@@ -83,9 +82,10 @@ create table if not exists `record`
 create table if not exists `execute_group_script_related`
 (
     `id`  bigint(20) NOT NULL AUTO_INCREMENT,
-    `index` bigint(20) NOT NULL COMMENT = '当前脚本关联在组中的执行顺序, 从0开始',
-    `script_id` bigint(20) NOT NULL COMMENT = '脚本id',
-    `execute_group_id` bigint(20) NOT NULL COMMENT = '执行组id',
+    `index` bigint(20) NOT NULL COMMENT '当前脚本关联在组中的执行顺序, 从0开始',
+    `script_id` bigint(20) NOT NULL COMMENT '脚本id',
+    `execute_group_id` bigint(20) NOT NULL COMMENT '执行组id',
+    PRIMARY KEY (`id`),
     UNIQUE KEY `uniq_execute_group_index` (`execute_group_id`, `index`)
 )   ENGINE = InnoDB
     DEFAULT Charset = utf8mb4
