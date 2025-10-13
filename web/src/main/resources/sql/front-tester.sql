@@ -90,3 +90,37 @@ create table if not exists `execute_group_script_related`
 )   ENGINE = InnoDB
     DEFAULT Charset = utf8mb4
     COLLATE = utf8mb4_unicode_ci COMMENT = '执行组与脚本关联信息';
+
+-- ===== 示例数据 ======
+-- 插入示例用例
+INSERT INTO `usecase` (`id`, `name`, `description`, `created`, `updated`) VALUES
+(1, '登录功能测试', '测试用户登录流程', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(2, '商品浏览测试', '测试商品列表和详情页', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(3, '购物车测试', '测试购物车添加和结算', UNIX_TIMESTAMP(), UNIX_TIMESTAMP());
+
+-- 插入示例脚本
+INSERT INTO `script` (`id`, `usecase_id`, `version`, `name`, `description`, `data`, `is_active`, `created`, `updated`) VALUES
+(1, 1, 'v1.0', '正常登录', '使用正确的用户名密码登录', 'Feature: 登录测试\nScenario: 正常登录', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(2, 1, 'v1.1', '错误密码登录', '使用错误密码登录', 'Feature: 登录测试\nScenario: 错误密码', 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(3, 2, 'v1.0', '浏览商品列表', '打开商品列表页面', 'Feature: 商品浏览\nScenario: 列表页', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(4, 2, 'v1.0', '查看商品详情', '点击商品查看详情', 'Feature: 商品浏览\nScenario: 详情页', 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(5, 3, 'v1.0', '添加商品到购物车', '将商品添加到购物车', 'Feature: 购物车\nScenario: 添加商品', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(6, 3, 'v1.0', '购物车结算', '在购物车中进行结算', 'Feature: 购物车\nScenario: 结算', 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP());
+
+-- 插入示例执行组
+INSERT INTO `execute_group_id` (`id`, `group_name`, `created`, `updated`) VALUES
+(1, '完整购物流程测试', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(2, '登录相关测试', UNIX_TIMESTAMP(), UNIX_TIMESTAMP());
+
+-- 插入执行组与脚本关联（完整购物流程：登录 -> 浏览商品 -> 添加购物车 -> 结算）
+INSERT INTO `execute_group_script_related` (`execute_group_id`, `script_id`, `index`) VALUES
+(1, 1, 0),  -- 第一步：正常登录
+(1, 3, 1),  -- 第二步：浏览商品列表
+(1, 4, 2),  -- 第三步：查看商品详情
+(1, 5, 3),  -- 第四步：添加到购物车
+(1, 6, 4);  -- 第五步：购物车结算
+
+-- 插入执行组与脚本关联（登录相关测试）
+INSERT INTO `execute_group_script_related` (`execute_group_id`, `script_id`, `index`) VALUES
+(2, 1, 0),  -- 正常登录
+(2, 2, 1);  -- 错误密码登录
