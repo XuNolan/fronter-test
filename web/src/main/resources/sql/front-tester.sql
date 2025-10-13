@@ -79,3 +79,14 @@ create table if not exists `record`
 )   ENGINE = InnoDB
     DEFAULT Charset = utf8mb4
     COLLATE = utf8mb4_unicode_ci COMMENT = '单一脚本录制信息';
+
+create table if not exists `execute_group_script_related`
+(
+    `id`  bigint(20) NOT NULL AUTO_INCREMENT,
+    `index` bigint(20) NOT NULL COMMENT = '当前脚本关联在组中的执行顺序, 从0开始',
+    `script_id` bigint(20) NOT NULL COMMENT = '脚本id',
+    `execute_group_id` bigint(20) NOT NULL COMMENT = '执行组id',
+    UNIQUE KEY `uniq_execute_group_index` (`execute_group_id`, `index`)
+)   ENGINE = InnoDB
+    DEFAULT Charset = utf8mb4
+    COLLATE = utf8mb4_unicode_ci COMMENT = '执行组与脚本关联信息';
