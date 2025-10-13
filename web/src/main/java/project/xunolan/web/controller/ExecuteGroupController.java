@@ -169,6 +169,7 @@ public class ExecuteGroupController {
 
             // 如果提供了脚本列表，创建关联关系
             if (request.getScripts() != null && !request.getScripts().isEmpty()) {
+                List<ExecuteGroupScriptRelated> relations = new ArrayList<>();
                 for (int i = 0; i < request.getScripts().size(); i++) {
                     ScriptItem scriptItem = request.getScripts().get(i);
                     ExecuteGroupScriptRelated relation = ExecuteGroupScriptRelated.builder()
@@ -176,8 +177,10 @@ public class ExecuteGroupController {
                             .scriptId(scriptItem.getScriptId())
                             .index((long) i)
                             .build();
-                    executeGroupScriptRelatedRepository.save(relation);
+                    relations.add(relation);
                 }
+                // 批量保存关联关系
+                executeGroupScriptRelatedRepository.saveAll(relations);
             }
 
             return new BasicResultVO<>(RespStatusEnum.SUCCESS, "创建成功", group.getId());
@@ -188,7 +191,7 @@ public class ExecuteGroupController {
     }
 
     /**
-     * 获取执行组详情（包含关联的脚本列表）
+     * 获取执行组详情（包含关联的脚本列表，带用例信息）
      * GET /execute-group/detail/{id}
      */
     @GetMapping("/detail/{id}")
@@ -200,16 +203,23 @@ public class ExecuteGroupController {
             List<ExecuteGroupScriptRelated> relations = executeGroupScriptRelatedRepository
                     .findByExecuteGroupIdOrderByIndexAsc(id);
 
-            List<ScriptInfoVO> scripts = new ArrayList<>();
+            List<ScriptDetailVO> scripts = new ArrayList<>();
             for (ExecuteGroupScriptRelated relation : relations) {
                 Script script = scriptService.queryScriptByScriptId(relation.getScriptId());
                 if (script != null) {
-                    scripts.add(ScriptInfoVO.builder()
+                    // 获取用例信息
+                    project.xunolan.database.entity.Usecase usecase = usecaseService.queryById(script.getUsecaseId());
+                    
+                    scripts.add(ScriptDetailVO.builder()
+                            .index(relation.getIndex())
                             .scriptId(script.getId())
                             .scriptName(script.getName())
                             .scriptDescription(script.getDescription())
                             .version(script.getVersion())
-                            .index(relation.getIndex())
+                            .usecaseId(script.getUsecaseId())
+                            .usecaseName(usecase != null ? usecase.getName() : "")
+                            .usecaseDescription(usecase != null ? usecase.getDescription() : "")
+                            .isActive(script.getIsActive())
                             .build());
                 }
             }
@@ -253,20 +263,57 @@ public class ExecuteGroupController {
             group.setUpdated((int) (System.currentTimeMillis() / 1000));
             executeGroupIdRepository.save(group);
 
-            // 更新脚本关联（如果提供了脚本列表）
-            if (request.getScriptIds() != null) {
-                // 删除旧的关联
-                executeGroupScriptRelatedRepository.deleteByExecuteGroupId(id);
+            // 更新脚本关联（支持两种格式：scriptIds 或 scripts）
+            if (request.getScripts() != null && !request.getScripts().isEmpty()) {
+                // 先查询现有的关联记录
+                List<ExecuteGroupScriptRelated> existingRelations = executeGroupScriptRelatedRepository
+                        .findByExecuteGroupIdOrderByIndexAsc(id);
+                
+                // 删除所有现有关联
+                if (!existingRelations.isEmpty()) {
+                    executeGroupScriptRelatedRepository.deleteAll(existingRelations);
+                    // 强制刷新，确保删除操作立即生效
+                    executeGroupScriptRelatedRepository.flush();
+                }
 
-                // 创建新的关联
+                // 创建新的关联（使用 scripts 格式）
+                List<ExecuteGroupScriptRelated> newRelations = new ArrayList<>();
+                for (int i = 0; i < request.getScripts().size(); i++) {
+                    ScriptItem scriptItem = request.getScripts().get(i);
+                    ExecuteGroupScriptRelated relation = ExecuteGroupScriptRelated.builder()
+                            .executeGroupId(id)
+                            .scriptId(scriptItem.getScriptId())
+                            .index((long) i)
+                            .build();
+                    newRelations.add(relation);
+                }
+                // 批量保存新关联
+                executeGroupScriptRelatedRepository.saveAll(newRelations);
+                
+            } else if (request.getScriptIds() != null && !request.getScriptIds().isEmpty()) {
+                // 先查询现有的关联记录
+                List<ExecuteGroupScriptRelated> existingRelations = executeGroupScriptRelatedRepository
+                        .findByExecuteGroupIdOrderByIndexAsc(id);
+                
+                // 删除所有现有关联
+                if (!existingRelations.isEmpty()) {
+                    executeGroupScriptRelatedRepository.deleteAll(existingRelations);
+                    // 强制刷新，确保删除操作立即生效
+                    executeGroupScriptRelatedRepository.flush();
+                }
+
+                // 创建新的关联（使用 scriptIds 格式）
+                List<ExecuteGroupScriptRelated> newRelations = new ArrayList<>();
                 for (int i = 0; i < request.getScriptIds().size(); i++) {
                     ExecuteGroupScriptRelated relation = ExecuteGroupScriptRelated.builder()
                             .executeGroupId(id)
                             .scriptId(request.getScriptIds().get(i))
                             .index((long) i)
                             .build();
-                    executeGroupScriptRelatedRepository.save(relation);
+                    newRelations.add(relation);
                 }
+                // 批量保存新关联
+                executeGroupScriptRelatedRepository.saveAll(newRelations);
             }
 
             return new BasicResultVO<>(RespStatusEnum.SUCCESS, "更新成功", null);
@@ -345,7 +392,8 @@ public class ExecuteGroupController {
     @Data
     public static class UpdateGroupRequest {
         private String groupName;
-        private List<Long> scriptIds;
+        private List<Long> scriptIds;  // 兼容旧格式
+        private List<ScriptItem> scripts;  // 新格式，支持拖拽排序
     }
 
     @Data
@@ -355,7 +403,21 @@ public class ExecuteGroupController {
         private String groupName;
         private Integer created;
         private Integer updated;
-        private List<ScriptInfoVO> scripts;
+        private List<ScriptDetailVO> scripts;
+    }
+
+    @Data
+    @lombok.Builder
+    public static class ScriptDetailVO {
+        private Long index;
+        private Long scriptId;
+        private String scriptName;
+        private String scriptDescription;
+        private String version;
+        private Long usecaseId;
+        private String usecaseName;
+        private String usecaseDescription;
+        private Boolean isActive;
     }
 
     @Data
