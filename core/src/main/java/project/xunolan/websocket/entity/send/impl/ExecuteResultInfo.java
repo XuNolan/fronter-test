@@ -21,16 +21,17 @@ private final String status;
  */
     public final int scenarioIndex;
     public final int stepIndex;
+    public final String status; // "passed", "failed", "skipped", "pending"
     public final long durationNanos;
     public final boolean aborted;
     public final String error;
     public final long startTime;
     public final long endTime;
 
-    public ExecuteResultInfo(int scenarioIndex, int stepIndex, long durationNanos, boolean aborted, String error,long startTime, long endTime) {
+    public ExecuteResultInfo(int scenarioIndex, int stepIndex, String status, long durationNanos, boolean aborted, String error, long startTime, long endTime) {
         this.scenarioIndex = scenarioIndex;
         this.stepIndex = stepIndex;
-
+        this.status = status;
         this.durationNanos = durationNanos;
         this.aborted = aborted;
         this.error = error;
@@ -40,9 +41,23 @@ private final String status;
 
     public static ExecuteResultInfo fromResult(int scenarioIndex, int stepIndex, StepResult stepResult) {
         Result result = stepResult.getResult();
+        
+        // 根据 Karate Result 状态确定字符串状态
+        String status;
+        if (result.isAborted()) {
+            status = "aborted";
+        } else if (result.isSkipped()) {
+            status = "skipped";
+        } else if (result.getErrorMessage() != null) {
+            status = "failed";
+        } else {
+            status = "passed";
+        }
+        
         return new ExecuteResultInfo(
                 scenarioIndex,
                 stepIndex,
+                status,
                 result.getDurationNanos(),
                 result.isAborted(),
                 result.getErrorMessage(),

@@ -91,8 +91,27 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         // 追加到 session 缓存（JSON 数组字符串）
         String existed = SessionKeyEnum.ACC_EXECUTE_LOG.get(session);
         String append = JSON.toJSONString(stepLogEntry);
-        log.info("afterStep - scenarioIndex: {}, stepIndex: {}, existed: '{}', append: '{}'", 
-                nowProcessScenarioIndex, nowProcessStepIndex, existed, append);
+        
+        // 根据当前 step 的执行结果更新整体 Feature 状态
+        Result result = stepResult.getResult();
+        Integer currentFeatureStatus = SessionKeyEnum.FEATURE_STATUS.getOrDefault(session, 0);
+        
+        // 状态优先级：中止(2) > 失败(1) > 成功(0)
+        // 一旦设置为失败或中止，就不再改变
+        if (currentFeatureStatus == 0) { // 只有在初始成功状态时才更新
+            if (result.isAborted()) {
+                SessionKeyEnum.FEATURE_STATUS.set(session, 2); // 中止
+            } else if (result.isFailed() || result.getError() != null) {
+                SessionKeyEnum.FEATURE_STATUS.set(session, 1); // 失败
+            }
+            // 成功或跳过时保持当前状态（0）
+        }
+        
+        log.debug("Step result - aborted: {}, failed: {}, error: {}, skipped: {}, currentFeatureStatus: {}", 
+                result.isAborted(), result.isFailed(), result.getError() != null, result.isSkipped(), currentFeatureStatus);
+        
+        log.info("afterStep - scenarioIndex: {}, stepIndex: {}, existed: '{}', append: '{}', featureStatus: {}", 
+                nowProcessScenarioIndex, nowProcessStepIndex, existed, append, SessionKeyEnum.FEATURE_STATUS.get(session));
         if (!StringUtils.hasText(existed)) {
             SessionKeyEnum.ACC_EXECUTE_LOG.set(session, "[" + append);
         } else {
@@ -130,9 +149,9 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         }
         Long executeLogId = SessionKeyEnum.EXECUTE_LOG_ID.get(session);
         Long executeStartTime = SessionKeyEnum.EXECUTE_START_TIME.get(session);
+        //基于各step的状态判断当前状态。
         Integer status = SessionKeyEnum.FEATURE_STATUS.getOrDefault(session, 0);
 
-        
         String existed = SessionKeyEnum.ACC_EXECUTE_LOG.get(session);
         String finalLog = (existed == null ? "[]" : existed + "]");
         log.info("afterFeature - executeLogId: {}, existed: '{}', finalLog: '{}', status: {}", executeLogId, existed, finalLog, status);
@@ -154,6 +173,7 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
             log.error("save execute_log failed", e);
         } finally {
             SessionKeyEnum.ACC_EXECUTE_LOG.remove(session);
+            SessionKeyEnum.FEATURE_STATUS.remove(session);
         }
     }
 }
