@@ -33,9 +33,6 @@ public class ExecuteLog {
     @Column(name = "log_data")
     private String logData;
 
-    @Column(name = "record_id")
-    private Long recordId;
-
     @Column(name = "execute_time", nullable = false)
     private Integer executeTime;
 
