@@ -78,7 +78,6 @@ create table if not exists `record`
     DEFAULT Charset = utf8mb4
     COLLATE = utf8mb4_unicode_ci COMMENT = '单一脚本录制信息';
 
-drop table `execute_log_record_related`;
 create table if not exists `execute_log_record_related`(
     `id`  bigint(20) NOT NULL AUTO_INCREMENT,
    `record_id` bigint(20) NOT NULL COMMENT '录制id',
