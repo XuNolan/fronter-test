@@ -19,6 +19,7 @@ import java.util.Map;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
+import static com.alibaba.fastjson.JSON.parseObject;
 import static org.monte.media.FormatKeys.*;
 import static org.monte.media.VideoFormatKeys.*;
 
@@ -35,63 +36,6 @@ public class ScreenRecorderService {
     private final String recordingsDir = "target/recordings";
 
     private static final Path CONFIG_FILE_PATH = Paths.get("config", "recording-config.json");
-    
-    /**
-     * 开始录制（新接口，不需要参数）
-     * 
-     * @return 录制ID
-     */
-    public synchronized Long startRecording() throws Exception {
-        if (screenRecorder != null) {
-            log.warn("Recording already in progress, stopping previous recording");
-            stopRecording();
-        }
-        
-        // 确保录像目录存在
-        Path recordingPath = Paths.get(recordingsDir);
-        if (!Files.exists(recordingPath)) {
-            Files.createDirectories(recordingPath);
-        }
-        
-        // 生成录像文件名
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        RecordingRuntimeConfig runtimeConfig = loadRuntimeConfig();
-        String fileName = String.format("test_%s", timestamp);
-        
-        try {
-            // 获取屏幕尺寸
-            GraphicsConfiguration gc = GraphicsEnvironment
-                    .getLocalGraphicsEnvironment()
-                    .getDefaultScreenDevice()
-                    .getDefaultConfiguration();
-            
-            // 配置录制参数（根据配置映射）
-            Format fileFormat = createFileFormat(runtimeConfig.format);
-            Format screenFormat = createScreenFormat(runtimeConfig);
-            Format mouseFormat = createMouseFormat();
-            Format audioFormat = createAudioFormat(runtimeConfig);
-            
-            screenRecorder = new CustomScreenRecorder(
-                    gc,
-                    gc.getBounds(),
-                    fileFormat,
-                    screenFormat,
-                    mouseFormat,
-                    audioFormat,
-                    new File(recordingsDir),
-                    fileName + selectExtension(runtimeConfig.format)
-            );
-            
-            screenRecorder.start();
-            
-            log.info("Started screen recording: {}/{}", recordingsDir, fileName + selectExtension(runtimeConfig.format));
-            return System.currentTimeMillis(); // 使用时间戳作为录制ID
-            
-        } catch (Exception e) {
-            log.error("Failed to start screen recording", e);
-            throw new Exception("Failed to start screen recording: " + e.getMessage(), e);
-        }
-    }
 
     /**
      * 开始录制（旧接口，保持兼容性）
@@ -151,36 +95,6 @@ public class ScreenRecorderService {
             throw new Exception("Failed to start screen recording: " + e.getMessage(), e);
         }
     }
-    
-    /**
-     * 停止录制（新接口，返回录制ID）
-     * 
-     * @param recordId 录制ID
-     * @return 录像文件
-     */
-    public synchronized File stopRecording(Long recordId) throws Exception {
-        if (screenRecorder == null) {
-            log.warn("No recording in progress");
-            return null;
-        }
-        
-        try {
-            screenRecorder.stop();
-            
-            // 获取生成的文件
-            currentRecordingFile = screenRecorder.getCreatedMovieFiles().get(0);
-            
-            log.info("Stopped screen recording (ID: {}): {}", recordId, currentRecordingFile.getAbsolutePath());
-            
-            return currentRecordingFile;
-            
-        } catch (Exception e) {
-            log.error("Failed to stop screen recording", e);
-            throw new Exception("Failed to stop screen recording: " + e.getMessage(), e);
-        } finally {
-            screenRecorder = null;
-        }
-    }
 
     /**
      * 停止录制（旧接口，保持兼容性）
@@ -236,7 +150,7 @@ public class ScreenRecorderService {
             }
             
             String json = new String(Files.readAllBytes(CONFIG_FILE_PATH), StandardCharsets.UTF_8);
-            com.alibaba.fastjson.JSON.parseObject(json, Map.class);
+            parseObject(json, Map.class);
             log.debug("Config file is valid: {}", CONFIG_FILE_PATH);
             return true;
         } catch (Exception e) {
@@ -275,12 +189,12 @@ public class ScreenRecorderService {
     /**
      * 运行时配置载入：从配置文件实时读取；失败则使用默认
      */
-    private RecordingRuntimeConfig loadRuntimeConfig() {
+    public RecordingRuntimeConfig loadRuntimeConfig() {
         try {
             Map<String, Object> cfgMap = null;
             if (Files.exists(CONFIG_FILE_PATH)) {
                 String json = new String(Files.readAllBytes(CONFIG_FILE_PATH), StandardCharsets.UTF_8);
-                cfgMap = com.alibaba.fastjson.JSON.parseObject(json, Map.class);
+                cfgMap = parseObject(json, Map.class);
                 log.debug("Loaded recording config from file: {}", CONFIG_FILE_PATH);
             } else {
                 log.warn("Recording config file not found: {}, using default config", CONFIG_FILE_PATH);
@@ -290,27 +204,34 @@ public class ScreenRecorderService {
             String format = getString(cfgMap, "format", "avi");
             int frameRate;
             float quality;
-            
+            String storage;
+            // 获取存储类型
+            if (cfgMap != null && cfgMap.containsKey("storage")) {
+                storage = (String) cfgMap.get("storage");
+            } else {
+                storage = "local";
+            }
             if (cfgMap != null && cfgMap.get("frameRate") != null) {
                 frameRate = ((Number) cfgMap.get("frameRate")).intValue();
             } else {
-                frameRate = ("high".equalsIgnoreCase(preset)) ? 30 : ("low".equalsIgnoreCase(preset) ? 10 : 15);
+                frameRate = getFrameRateByPreset(preset);
             }
             
             if (cfgMap != null && cfgMap.get("quality") != null) {
                 quality = ((Number) cfgMap.get("quality")).floatValue();
             } else {
-                quality = ("high".equalsIgnoreCase(preset)) ? 1.0f : ("low".equalsIgnoreCase(preset) ? 0.5f : 0.8f);
+                quality = getQualityByPreset(preset);
             }
             
-            RecordingRuntimeConfig config = new RecordingRuntimeConfig(format, frameRate, quality);
+            RecordingRuntimeConfig config = new RecordingRuntimeConfig(format, frameRate, quality, storage);
+            config.setQualityPreset(preset);
             log.info("Recording config loaded - Format: {}, FrameRate: {}, Quality: {}, Preset: {}", 
                     config.format, config.frameRate, config.quality, preset);
             
             return config;
         } catch (Exception e) {
             log.warn("Use default recording config due to error: {}", e.getMessage());
-            return new RecordingRuntimeConfig("avi", 15, 0.8f);
+            return new RecordingRuntimeConfig("avi", 15, 0.8f, "local");
         }
     }
 
@@ -318,6 +239,40 @@ public class ScreenRecorderService {
         if (map == null) return def;
         Object v = map.get(key);
         return v == null ? def : String.valueOf(v);
+    }
+    
+    /**
+     * 根据质量预设获取帧率
+     */
+    private int getFrameRateByPreset(String preset) {
+        if (preset == null) return 15; // 默认 medium
+        
+        switch (preset.toLowerCase()) {
+            case "high":
+                return 30;
+            case "low":
+                return 10;
+            case "medium":
+            default:
+                return 15;
+        }
+    }
+    
+    /**
+     * 根据质量预设获取质量值
+     */
+    private float getQualityByPreset(String preset) {
+        if (preset == null) return 0.8f; // 默认 medium
+        
+        switch (preset.toLowerCase()) {
+            case "high":
+                return 1.0f;
+            case "low":
+                return 0.5f;
+            case "medium":
+            default:
+                return 0.8f;
+        }
     }
 
     private String selectExtension(String format) {
@@ -397,14 +352,27 @@ public class ScreenRecorderService {
         return null;
     }
 
-    private static class RecordingRuntimeConfig {
-        final String format;
-        final int frameRate;
-        final float quality;
-        RecordingRuntimeConfig(String format, int frameRate, float quality) {
+    //获取存储类型
+    public String getStorageType() {
+        return loadRuntimeConfig().storage;
+    }
+
+    public static class RecordingRuntimeConfig {
+        public final String format;
+        public final int frameRate;
+        public final float quality;
+        public final String storage;
+        public String qualityPreset;
+        
+        public RecordingRuntimeConfig(String format, int frameRate, float quality, String storage) {
             this.format = format;
             this.frameRate = frameRate;
             this.quality = quality;
+            this.storage = storage;
+        }
+        
+        public void setQualityPreset(String qualityPreset) {
+            this.qualityPreset = qualityPreset;
         }
     }
 }
