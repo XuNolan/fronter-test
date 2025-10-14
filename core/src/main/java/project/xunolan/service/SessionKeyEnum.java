@@ -43,4 +43,8 @@ public enum SessionKeyEnum {
         Object v = session.getUserProperties().get(key);
         return v == null ? defaultValue : (T) v;
     }
+
+    public void remove(Session session) {
+        session.getUserProperties().remove(key);
+    }
 }

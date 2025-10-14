@@ -134,7 +134,7 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         } catch (Exception e) {
             log.error("save execute_log failed", e);
         } finally {
-            SessionKeyEnum.ACC_EXECUTE_LOG.set(session, null);
+            SessionKeyEnum.ACC_EXECUTE_LOG.remove(session);
         }
     }
 }
