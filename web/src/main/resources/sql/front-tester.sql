@@ -63,7 +63,7 @@ create table if not exists `record`
     `id`  bigint(20) NOT NULL AUTO_INCREMENT,
     `usecase_id` bigint(20) NOT NULL COMMENT '所属的用例id',
     `script_id` bigint(20) NOT NULL COMMENT '所属的脚本id',
-    `execute_group_id` bigint(20) NOT NULL COMMENT '批量执行状态下的组别id，若仅为单例执行则为固定值或null',
+    `execute_group_id` bigint(20) COMMENT '批量执行状态下的组别id，若仅为单例执行则为固定值或null',
     `status` tinyint(4) NOT NULL COMMENT '执行状态：0执行成功 1执行失败 2执行中止',
     `storage_type` varchar(20) NOT NULL COMMENT '存储方式，local则存储在后端本地，仅记录文件路径名；database则存储在数据库',
     `record_url` varchar(256) COMMENT 'local前提下存储在后端本地的录制文件位置',
@@ -143,3 +143,18 @@ INSERT INTO `execute_group_script_related` (`execute_group_id`, `script_id`, `in
 INSERT INTO `execute_group_script_related` (`execute_group_id`, `script_id`, `index`) VALUES
 (2, 1, 0),  -- 正常登录
 (2, 2, 1);  -- 错误密码登录
+
+
+
+SET @script_id := 3;
+SET @usecase_id := (SELECT usecase_id FROM script WHERE id = @script_id);
+-- 示例1：成功的执行日志 + 有录制
+INSERT INTO execute_log (usecase_id, script_id, execute_group_id, log_data, execute_time, status)
+VALUES (@usecase_id, @script_id, NULL, '[{"msg":"mock run start"},{"msg":"mock step ok"}]', 1200, 0);
+
+INSERT INTO record (usecase_id, script_id, execute_group_id, status, storage_type, record_url, record_data, metadata, record_config_type, execute_time)
+VALUES (@usecase_id, @script_id, NULL, 0, 'local', CONCAT('/tmp/mock-', @execute_log_id, '.avi'), NULL,
+        JSON_OBJECT('duration', 1200, 'file_name', CONCAT('mock-', @execute_log_id, '.avi')), 1, 1200);
+
+INSERT INTO execute_log_record_related (execute_log_id, record_id)
+VALUES (25, 1);
