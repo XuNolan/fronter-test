@@ -52,6 +52,7 @@ create table if not exists `execute_log`
     `log_data` varchar(2048) COMMENT '执行log信息，此脚本执行的所有文本信息',
     `execute_time` int(11) NOT NULL DEFAULT '0' COMMENT '执行时间',
     `status` tinyint(4) NOT NULL COMMENT '执行状态：0执行成功 1执行失败 2执行中止',
+    `created`          int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
     PRIMARY KEY (`id`),
     KEY(`execute_group_id`)
 )   ENGINE = InnoDB
@@ -71,6 +72,7 @@ create table if not exists `record`
     `metadata` TEXT NOT NULL COMMENT '录制元数据',
     `record_config_type` tinyint(4) NOT NULL COMMENT '录制质量。目前暂时提供LOW/BANLANCE/HIGH三种类型, 配置固化',
     `execute_time` int(11) NOT NULL DEFAULT '0' COMMENT '单日志执行时间',
+    `created`          int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
     PRIMARY KEY (`id`),
     KEY(`execute_group_id`)
 
@@ -149,12 +151,13 @@ INSERT INTO `execute_group_script_related` (`execute_group_id`, `script_id`, `in
 SET @script_id := 3;
 SET @usecase_id := (SELECT usecase_id FROM script WHERE id = @script_id);
 -- 示例1：成功的执行日志 + 有录制
-INSERT INTO execute_log (usecase_id, script_id, execute_group_id, log_data, execute_time, status)
-VALUES (@usecase_id, @script_id, NULL, '[{"msg":"mock run start"},{"msg":"mock step ok"}]', 1200, 0);
+INSERT INTO execute_log (usecase_id, script_id, execute_group_id, log_data, execute_time, status, created)
+VALUES (@usecase_id, @script_id, NULL, '[{"msg":"mock run start"},{"msg":"mock step ok"}]', 1200, 0, UNIX_TIMESTAMP());
 
-INSERT INTO record (usecase_id, script_id, execute_group_id, status, storage_type, record_url, record_data, metadata, record_config_type, execute_time)
+INSERT INTO record (usecase_id, script_id, execute_group_id, status, storage_type, record_url, record_data, metadata, record_config_type, execute_time, created)
 VALUES (@usecase_id, @script_id, NULL, 0, 'local', CONCAT('/tmp/mock-', @execute_log_id, '.avi'), NULL,
-        JSON_OBJECT('duration', 1200, 'file_name', CONCAT('mock-', @execute_log_id, '.avi')), 1, 1200);
+        JSON_OBJECT('duration', 1200, 'file_name', CONCAT('mock-', @execute_log_id, '.avi')), 1, 1200, UNIX_TIMESTAMP());
 
 INSERT INTO execute_log_record_related (execute_log_id, record_id)
-VALUES (25, 1);
+VALUES (1, 1);
+

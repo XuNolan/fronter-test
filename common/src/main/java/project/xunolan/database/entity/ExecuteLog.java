@@ -38,4 +38,8 @@ public class ExecuteLog {
 
     @Column(name = "status", nullable = false)
     private Integer status;
+
+    /** 创建时间（UNIX 秒） */
+    @Column(name = "created")
+    private Integer created;
 }
