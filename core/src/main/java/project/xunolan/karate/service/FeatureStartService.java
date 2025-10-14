@@ -73,6 +73,9 @@ public class FeatureStartService {
     }
 
     public void runScript(Session session, Script script, Boolean withRecording) {
+        // 设置自定义属性
+        session.getUserProperties().put("usecaseId", script.getUsecaseId());
+        session.getUserProperties().put("scriptId", script.getId());
         try {
             //基于script构造feature；
             Feature feature = resolveScript(script);
@@ -80,6 +83,8 @@ public class FeatureStartService {
                 return;
             }
             runKarateFeature(feature, session, withRecording);
+            session.getUserProperties().remove("usecaseId");
+            session.getUserProperties().remove("scriptId");
         } catch (Exception e) {
             log.error("Error running Karate feature", e);
         } finally {
