@@ -50,14 +50,13 @@ create table if not exists `execute_log`
     `script_id` bigint(20) NOT NULL COMMENT '所属的脚本id',
     `execute_group_id` bigint(20) COMMENT '执行组id。若为空则单例执行',
     `log_data` varchar(2048) COMMENT '执行log信息，此脚本执行的所有文本信息',
-    `record_id` bigint(20) COMMENT '录像id',
     `execute_time` int(11) NOT NULL DEFAULT '0' COMMENT '执行时间',
     `status` tinyint(4) NOT NULL COMMENT '执行状态：0执行成功 1执行失败 2执行中止',
     PRIMARY KEY (`id`),
     KEY(`execute_group_id`)
 )   ENGINE = InnoDB
     DEFAULT Charset = utf8mb4
-    COLLATE = utf8mb4_unicode_ci COMMENT = '单一脚本执行日志';
+    COLLATE = utf8mb4_unicode_ci COMMENT = '单一脚本执行日志，必定存在';
 
 create table if not exists `record`
 (
@@ -78,6 +77,17 @@ create table if not exists `record`
 )   ENGINE = InnoDB
     DEFAULT Charset = utf8mb4
     COLLATE = utf8mb4_unicode_ci COMMENT = '单一脚本录制信息';
+
+drop table `execute_log_record_related`;
+create table if not exists `execute_log_record_related`(
+    `id`  bigint(20) NOT NULL AUTO_INCREMENT,
+   `record_id` bigint(20) NOT NULL COMMENT '录制id',
+   `execute_group_id` bigint(20) NOT NULL COMMENT '脚本id',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+ DEFAULT Charset = utf8mb4
+ COLLATE = utf8mb4_unicode_ci COMMENT = '录制文件与脚本关联id';
+
 
 create table if not exists `execute_group_script_related`
 (
