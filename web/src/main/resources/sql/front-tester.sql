@@ -81,7 +81,7 @@ create table if not exists `record`
 create table if not exists `execute_log_record_related`(
     `id`  bigint(20) NOT NULL AUTO_INCREMENT,
    `record_id` bigint(20) NOT NULL COMMENT '录制id',
-   `execute_group_id` bigint(20) NOT NULL COMMENT '脚本id',
+   `execute_log_id` bigint(20) NOT NULL COMMENT '脚本id',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
  DEFAULT Charset = utf8mb4
@@ -99,6 +99,16 @@ create table if not exists `execute_group_script_related`
 )   ENGINE = InnoDB
     DEFAULT Charset = utf8mb4
     COLLATE = utf8mb4_unicode_ci COMMENT = '执行组与脚本关联信息';
+
+create table if not exists `execute_group_log_related`(
+  `id`  bigint(20) NOT NULL AUTO_INCREMENT,
+  `execute_log_id` bigint(20) NOT NULL COMMENT '执行日志id',
+  `execute_term_id` char(36) NOT NULL COMMENT '执行组一次执行的uuid',
+  `execute_group_id` bigint(20) NOT NULL COMMENT '执行组id',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+ DEFAULT Charset = utf8mb4
+ COLLATE = utf8mb4_unicode_ci COMMENT = '执行组的一次执行有哪些日志记录（定位哪些日志记录，及通过execute_log_record_related进一步定位哪些录制内容）属于一个执行组的一次执行';
 
 -- ===== 示例数据 ======
 -- 插入示例用例

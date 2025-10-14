@@ -8,4 +8,5 @@ import java.util.List;
 public interface ExecuteLogRepository extends JpaRepository<ExecuteLog, Long> {
     List<ExecuteLog> findAllByScriptId(Long scriptId);
     ExecuteLog findFirstByScriptIdOrderByExecuteTimeDesc(Long scriptId);
+    List<ExecuteLog> findByScriptIdOrderByIdDesc(Long scriptId);
 }
