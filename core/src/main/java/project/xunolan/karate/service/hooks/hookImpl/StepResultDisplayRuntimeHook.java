@@ -47,6 +47,7 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
                 .logData("")
                 .executeTime(0)
                 .status(2) // 2 执行中止/进行中
+                .created((int)(System.currentTimeMillis() / 1000))
                 .build();
         logRow = executeLogRepository.save(logRow);
         SessionKeyEnum.EXECUTE_LOG_ID.set(session, logRow.getId());
@@ -73,12 +74,25 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
 
     @Override
     public void afterStep(StepResult stepResult, ScenarioRuntime sr) {
-        ExecuteResultInfo executeResultInfo = ExecuteResultInfo.fromResult(nowProcessScenarioIndex, nowProcessStepIndex,stepResult);
+        ExecuteResultInfo executeResultInfo = ExecuteResultInfo.fromResult(nowProcessScenarioIndex, nowProcessStepIndex, stepResult);
         Session session = FeatureStartService.currentlyUseSession.get();
+        // 向前端实时推送（保持不变）
         SocketPackage.sendToExecuteLogQueue(new SocketPackage(session, JSON.toJSONString(new SendEntity(SendMsgType.ExecuteInfoMsg.getMsgType(), JSON.toJSONString(executeResultInfo)))));
-        // 追加到 session 缓存的日志文本中（JSON 数组）
+
+        // 构造更丰富的 step 日志条目：包含原始脚本、索引、以及 fromResult 序列化后的完整明细
+        String rawStep = stepResult.getStep().getPrefix() + " " + stepResult.getStep().getText();
+        java.util.Map<String, Object> stepLogEntry = new java.util.LinkedHashMap<>();
+        stepLogEntry.put("scenarioIndex", nowProcessScenarioIndex);
+        stepLogEntry.put("stepIndex", nowProcessStepIndex);
+        stepLogEntry.put("stepString", rawStep);
+        // 详细执行信息（包含开始/结束时间、耗时、是否成功、错误信息、可能的日志等，由 fromResult 提供）
+        stepLogEntry.put("detail", executeResultInfo);
+
+        // 追加到 session 缓存（JSON 数组字符串）
         String existed = SessionKeyEnum.ACC_EXECUTE_LOG.get(session);
-        String append = JSON.toJSONString(executeResultInfo);
+        String append = JSON.toJSONString(stepLogEntry);
+        log.info("afterStep - scenarioIndex: {}, stepIndex: {}, existed: '{}', append: '{}'", 
+                nowProcessScenarioIndex, nowProcessStepIndex, existed, append);
         if (!StringUtils.hasText(existed)) {
             SessionKeyEnum.ACC_EXECUTE_LOG.set(session, "[" + append);
         } else {
@@ -111,6 +125,7 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         //完成统计信息的实际数据库存储。
         Session session = FeatureStartService.currentlyUseSession.get();
         if (session == null) {
+            log.warn("session is null in afterFeature");
             return;
         }
         Long executeLogId = SessionKeyEnum.EXECUTE_LOG_ID.get(session);
@@ -120,6 +135,7 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         
         String existed = SessionKeyEnum.ACC_EXECUTE_LOG.get(session);
         String finalLog = (existed == null ? "[]" : existed + "]");
+        log.info("afterFeature - executeLogId: {}, existed: '{}', finalLog: '{}', status: {}", executeLogId, existed, finalLog, status);
 
         try {
             ExecuteLogRepository executeLogRepository = BeanUtils.getBean(ExecuteLogRepository.class);
@@ -130,6 +146,9 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
                 int elapsed = executeStartTime == null ? 0 : (int)(System.currentTimeMillis() - executeStartTime);
                 row.setExecuteTime(elapsed);
                 executeLogRepository.save(row);
+                log.info("saved execute_log with logData: '{}', status: {}", finalLog, status);
+            } else {
+                log.warn("execute_log not found for id: {}", executeLogId);
             }
         } catch (Exception e) {
             log.error("save execute_log failed", e);
