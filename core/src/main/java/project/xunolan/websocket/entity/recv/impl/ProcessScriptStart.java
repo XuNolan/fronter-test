@@ -14,12 +14,14 @@ import javax.websocket.Session;
 public class ProcessScriptStart extends RecvMsgBase {
     //执行单位为feature。
     public Long scriptId;
+    public Boolean needRecorded;  // 是否需要录制
 
     @Override
     public void processMsg(Session session) {
         ScriptService scriptService = BeanUtils.getBean(ScriptService.class);
         Script script = scriptService.queryScriptByScriptId(scriptId);
         FeatureStartService featureStartService = BeanUtils.getBean(FeatureStartService.class);
-        featureStartService.runScript(session, script);
+        // 传递录制参数给执行服务
+        featureStartService.runScript(session, script, needRecorded);
     }
 }

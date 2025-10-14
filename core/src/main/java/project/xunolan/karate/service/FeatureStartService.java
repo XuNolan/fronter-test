@@ -3,6 +3,7 @@ package project.xunolan.karate.service;
 import com.intuit.karate.Runner;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
+import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.resource.MemoryResource;
 import com.intuit.karate.resource.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import project.xunolan.database.entity.Script;
 import project.xunolan.karate.adapter.ResourceAdapter;
 import project.xunolan.karate.service.hooks.HookService;
+import project.xunolan.karate.service.hooks.hookImpl.FeatureRecordRuntimeHook;
+import project.xunolan.service.ScreenRecorderService;
 
 import javax.websocket.Session;
 import java.io.ByteArrayInputStream;
@@ -20,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -68,25 +72,34 @@ public class FeatureStartService {
         return Feature.read(new ResourceAdapter(byteArrayInputStream));
     }
 
-    public void runScript(Session session, Script script) {
+    public void runScript(Session session, Script script, Boolean withRecording) {
         try {
             //基于script构造feature；
             Feature feature = resolveScript(script);
             if (feature == null) {
                 return;
             }
-            runKarateFeature(feature, session);
+            runKarateFeature(feature, session, withRecording);
         } catch (Exception e) {
             log.error("Error running Karate feature", e);
         } finally {
             currentlyUseSession.remove();
         }
     }
-
-    private void runKarateFeature(Feature feature, Session session){
+    
+    private void runKarateFeature(Feature feature, Session session, Boolean withRecording){
         currentlyUseSession.set(session);
         FeatureCall featureCall = new FeatureCall(feature);
-        Runner.Builder customizeBuilder = Runner.builder().hooks(hookService.getCommonHooks()) //保留配置hook
+        
+        // 根据是否需要录制选择不同的钩子
+        List<RuntimeHook> hooks;
+        if(withRecording != null && withRecording){
+            hooks = hookService.getRecordHooks();
+        } else {
+            hooks = hookService.getCommonHooks();
+        }
+
+        Runner.Builder customizeBuilder = Runner.builder().hooks(hooks) //保留配置hook
                 //显式设置单线程（确保 ThreadLocal 有效）
                 .threads(1)
                 //禁用所有报告功能。当前仅考虑性能？之后如果有生成报告需求的话可能要移出。
@@ -103,5 +116,4 @@ public class FeatureStartService {
         featureRuntime.run();
         currentlyUseSession.remove();
     }
-
 }
