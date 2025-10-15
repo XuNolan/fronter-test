@@ -14,6 +14,7 @@ import project.xunolan.karate.service.FeatureStartService;
 import project.xunolan.service.ScreenRecorderService;
 import project.xunolan.websocket.utils.BeanUtils;
 import project.xunolan.service.SessionKeyEnum;
+import com.alibaba.fastjson.JSON;
 
 import javax.websocket.Session;
 import java.io.File;
