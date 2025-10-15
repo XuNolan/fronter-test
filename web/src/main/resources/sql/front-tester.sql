@@ -83,7 +83,7 @@ create table if not exists `record`
 create table if not exists `execute_log_record_related`(
     `id`  bigint(20) NOT NULL AUTO_INCREMENT,
    `record_id` bigint(20) NOT NULL COMMENT '录制id',
-   `execute_log_id` bigint(20) NOT NULL COMMENT '脚本id',
+   `execute_log_id` bigint(20) NOT NULL COMMENT '执行日志id',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
  DEFAULT Charset = utf8mb4
@@ -107,6 +107,7 @@ create table if not exists `execute_group_log_related`(
   `execute_log_id` bigint(20) NOT NULL COMMENT '执行日志id',
   `execute_term_id` char(36) NOT NULL COMMENT '执行组一次执行的uuid',
   `execute_group_id` bigint(20) NOT NULL COMMENT '执行组id',
+  `created`          int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
  DEFAULT Charset = utf8mb4
@@ -158,6 +159,53 @@ INSERT INTO record (usecase_id, script_id, execute_group_id, status, storage_typ
 VALUES (@usecase_id, @script_id, NULL, 0, 'local', CONCAT('/tmp/mock-', @execute_log_id, '.avi'), NULL,
         JSON_OBJECT('duration', 1200, 'file_name', CONCAT('mock-', @execute_log_id, '.avi')), 1, 1200, UNIX_TIMESTAMP());
 
-INSERT INTO execute_log_record_related (execute_log_id, record_id)
-VALUES (1, 1);
+SET @group_id := 1;
+SET @term_a := '11111111-1111-1111-1111-111111111111';
+SET @now := UNIX_TIMESTAMP();
 
+-- 日志1：脚本1（成功，有录制）
+INSERT INTO execute_log (usecase_id, script_id, execute_group_id, log_data, execute_time, status, created)
+SELECT s.usecase_id, s.id, @group_id, '[{"msg":"run start"},{"msg":"ok step"}]', 1300, 0, @now - 300
+FROM script s WHERE s.id = 1;
+SET @log1 := LAST_INSERT_ID();
+
+INSERT INTO execute_group_log_related (execute_log_id, execute_term_id, execute_group_id, created)
+VALUES (@log1, @term_a, @group_id, @now - 300);
+
+INSERT INTO record (usecase_id, script_id, execute_group_id, status, storage_type, record_url, record_data, metadata, record_config_type, execute_time, created)
+SELECT s.usecase_id, s.id, @group_id, 0, 'local',
+       CONCAT('/tmp/mock-', @log1, '.avi'), NULL,
+       JSON_OBJECT('duration', 1300, 'file_name', CONCAT('mock-', @log1, '.avi'), 'format', 'avi'),
+       1, 1300, @now - 300
+FROM script s WHERE s.id = 1;
+SET @rec1 := LAST_INSERT_ID();
+
+INSERT INTO execute_log_record_related (record_id, execute_log_id) VALUES (@rec1, @log1);
+
+-- 日志2：脚本3（失败，无录制）
+INSERT INTO execute_log (usecase_id, script_id, execute_group_id, log_data, execute_time, status, created)
+SELECT s.usecase_id, s.id, @group_id, '[{"msg":"run start"},{"msg":"some step failed"}]', 2100, 1, @now - 280
+FROM script s WHERE s.id = 3;
+SET @log2 := LAST_INSERT_ID();
+
+INSERT INTO execute_group_log_related (execute_log_id, execute_term_id, execute_group_id, created)
+VALUES (@log2, @term_a, @group_id, @now - 280);
+
+-- 日志3：脚本5（成功，有录制）
+INSERT INTO execute_log (usecase_id, script_id, execute_group_id, log_data, execute_time, status, created)
+SELECT s.usecase_id, s.id, @group_id, '[{"msg":"run start"},{"msg":"ok step"}]', 1600, 0, @now - 260
+FROM script s WHERE s.id = 5;
+SET @log3 := LAST_INSERT_ID();
+
+INSERT INTO execute_group_log_related (execute_log_id, execute_term_id, execute_group_id, created)
+VALUES (@log3, @term_a, @group_id, @now - 260);
+
+INSERT INTO record (usecase_id, script_id, execute_group_id, status, storage_type, record_url, record_data, metadata, record_config_type, execute_time, created)
+SELECT s.usecase_id, s.id, @group_id, 0, 'local',
+       CONCAT('/tmp/mock-', @log3, '.avi'), NULL,
+       JSON_OBJECT('duration', 1600, 'file_name', CONCAT('mock-', @log3, '.avi'), 'format', 'avi'),
+       1, 1600, @now - 260
+FROM script s WHERE s.id = 5;
+SET @rec3 := LAST_INSERT_ID();
+
+INSERT INTO execute_log_record_related (record_id, execute_log_id) VALUES (@rec3, @log3);

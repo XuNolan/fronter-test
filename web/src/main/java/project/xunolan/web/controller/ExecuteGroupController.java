@@ -11,6 +11,12 @@ import project.xunolan.database.entity.ExecuteGroupScriptRelated;
 import project.xunolan.database.entity.Script;
 import project.xunolan.database.repository.ExecuteGroupIdRepository;
 import project.xunolan.database.repository.ExecuteGroupScriptRelatedRepository;
+import project.xunolan.database.repository.ExecuteGroupLogRelatedRepository;
+import project.xunolan.database.repository.ExecuteLogRepository;
+import project.xunolan.database.repository.ExecuteLogRecordRelatedRepository;
+import project.xunolan.database.entity.ExecuteGroupLogRelated;
+import project.xunolan.database.entity.ExecuteLog;
+import project.xunolan.database.entity.ExecuteLogRecordRelated;
 import project.xunolan.service.ScriptService;
 import project.xunolan.web.amisEntity.aspect.AmisResult;
 import project.xunolan.web.amisEntity.entity.AmisCrudListVo;
@@ -36,6 +42,15 @@ public class ExecuteGroupController {
     private ExecuteGroupScriptRelatedRepository executeGroupScriptRelatedRepository;
 
     @Autowired
+    private ExecuteGroupLogRelatedRepository executeGroupLogRelatedRepository;
+
+    @Autowired
+    private ExecuteLogRepository executeLogRepository;
+
+    @Autowired
+    private ExecuteLogRecordRelatedRepository executeLogRecordRelatedRepository;
+
+    @Autowired
     private ScriptService scriptService;
 
     @Autowired
@@ -43,6 +58,100 @@ public class ExecuteGroupController {
 
     @Autowired
     private project.xunolan.database.repository.ScriptRepository scriptRepository;
+
+    /**
+     * 执行组批次列表（按 execute_term_id 聚合）
+     */
+    @GetMapping("/batches/{groupId}")
+    public List<Map<String, Object>> listBatches(@PathVariable("groupId") Long groupId) {
+        List<ExecuteGroupLogRelated> items = executeGroupLogRelatedRepository.findByExecuteGroupId(groupId);
+        Map<String, List<ExecuteGroupLogRelated>> grouped = items.stream().collect(Collectors.groupingBy(ExecuteGroupLogRelated::getExecuteTermId));
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map.Entry<String, List<ExecuteGroupLogRelated>> e : grouped.entrySet()) {
+            String term = e.getKey();
+            List<ExecuteGroupLogRelated> list = e.getValue();
+            int created = list.stream().map(ExecuteGroupLogRelated::getCreated).filter(Objects::nonNull).min(Integer::compareTo).orElse(0);
+            Map<String, Object> row = new HashMap<>();
+            row.put("executeTermId", term);
+            row.put("created", created);
+            row.put("count", list.size());
+            result.add(row);
+        }
+        result.sort(Comparator.comparing(m -> (Integer)m.getOrDefault("created", 0)));
+        return result;
+    }
+
+    /**
+     * 删除整个批次（仅删除关联与录制，保留 execute_log）
+     */
+    @PostMapping("/batch/delete")
+    @Transactional
+    public Map<String, Object> deleteBatch(@RequestParam("groupId") Long groupId,
+                                           @RequestParam("executeTermId") String executeTermId) {
+        Map<String, Object> resp = new HashMap<>();
+        List<ExecuteGroupLogRelated> related = executeGroupLogRelatedRepository.findByExecuteGroupIdAndExecuteTermId(groupId, executeTermId);
+        for (ExecuteGroupLogRelated r : related) {
+            Long logId = r.getExecuteLogId();
+            // 删除录制（如有）
+            executeLogRecordRelatedRepository.findByExecuteLogId(logId).ifPresent(rel -> {
+                // 仅删除关联，不在此处删除 record 数据本体，交由 /execute-log/delete 专用接口处理
+                executeLogRecordRelatedRepository.delete(rel);
+            });
+        }
+        // 删除批次关联数据
+        executeGroupLogRelatedRepository.deleteAll(related);
+        resp.put("status", 0);
+        resp.put("deleted", related.size());
+        return resp;
+    }
+
+    /**
+     * 执行组某次执行的详情（该次所有 execute_log 及录制信息）
+     */
+    @GetMapping("/batch/detail")
+    public Map<String, Object> batchDetail(@RequestParam("groupId") Long groupId,
+                                           @RequestParam("executeTermId") String executeTermId) {
+        List<ExecuteGroupLogRelated> related = executeGroupLogRelatedRepository.findByExecuteGroupIdAndExecuteTermId(groupId, executeTermId);
+        List<Long> logIds = related.stream().map(ExecuteGroupLogRelated::getExecuteLogId).collect(Collectors.toList());
+        List<ExecuteLog> logs = logIds.isEmpty() ? Collections.emptyList() : executeLogRepository.findAllById(logIds);
+        Map<Long, ExecuteLogRecordRelated> logIdToRecord = new HashMap<>();
+        for (Long id : logIds) {
+            executeLogRecordRelatedRepository.findByExecuteLogId(id).ifPresent(rel -> logIdToRecord.put(id, rel));
+        }
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (ExecuteLog log : logs) {
+            Map<String, Object> row = new HashMap<>();
+            row.put("executeLogId", log.getId());
+            row.put("created", log.getCreated());
+            row.put("status", log.getStatus());
+            row.put("statusText", getStatusText(log.getStatus()));
+            ExecuteLogRecordRelated rel = logIdToRecord.get(log.getId());
+            if (rel != null) {
+                row.put("hasRecord", true);
+                row.put("recordId", rel.getRecordId());
+            } else {
+                row.put("hasRecord", false);
+            }
+            rows.add(row);
+        }
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("items", rows);
+        return resp;
+    }
+
+    private String getStatusText(Integer status) {
+        if (status == null) return "未知";
+        switch (status) {
+            case 0:
+                return "成功";
+            case 1:
+                return "失败";
+            case 2:
+                return "中止/进行中";
+            default:
+                return "未知";
+        }
+    }
 
     /**
      * 获取所有可用脚本（用于执行组选择）
