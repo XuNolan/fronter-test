@@ -159,6 +159,9 @@ INSERT INTO record (usecase_id, script_id, execute_group_id, status, storage_typ
 VALUES (@usecase_id, @script_id, NULL, 0, 'local', CONCAT('/tmp/mock-', @execute_log_id, '.avi'), NULL,
         JSON_OBJECT('duration', 1200, 'file_name', CONCAT('mock-', @execute_log_id, '.avi')), 1, 1200, UNIX_TIMESTAMP());
 
+
+
+
 SET @group_id := 1;
 SET @term_a := '11111111-1111-1111-1111-111111111111';
 SET @now := UNIX_TIMESTAMP();

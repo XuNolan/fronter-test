@@ -101,18 +101,44 @@ public class ExecuteGroupController {
                                            @RequestParam("executeTermId") String executeTermId) {
         Map<String, Object> resp = new HashMap<>();
         List<ExecuteGroupLogRelated> related = executeGroupLogRelatedRepository.findByExecuteGroupIdAndExecuteTermId(groupId, executeTermId);
+        int deletedLogs = 0;
+        int deletedRecords = 0;
+
         for (ExecuteGroupLogRelated r : related) {
             Long logId = r.getExecuteLogId();
-            // 删除录制（如有）
+
+            // 1) 删除录制及关联
             executeLogRecordRelatedRepository.findByExecuteLogId(logId).ifPresent(rel -> {
-                // 仅删除关联，不在此处删除 record 数据本体，交由 /execute-log/delete 专用接口处理
+                Long recordId = rel.getRecordId();
+                // 删除本地文件（若存在）
+                recordRepository.findById(recordId).ifPresent(record -> {
+                    if (record.getStorageType() != null && record.getStorageType().equalsIgnoreCase("local")) {
+                        String path = record.getRecordUrl();
+                        if (path != null) {
+                            try { java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(path)); } catch (Exception ignored) {}
+                        }
+                    }
+                });
+                // 删除record与关联
+                recordRepository.deleteById(recordId);
                 executeLogRecordRelatedRepository.delete(rel);
             });
+
+            // 2) 删除execute_log
+            if (executeLogRepository.existsById(logId)) {
+                executeLogRepository.deleteById(logId);
+                deletedLogs++;
+            }
         }
-        // 删除批次关联数据
+
+        // 3) 删除该批次的组关联
         executeGroupLogRelatedRepository.deleteAll(related);
+
+        // 简单统计：已删除的record数量=关联表数量中有record的数量
+        // 这里无法直接统计精确个数（已在循环中删除），用related.size()作为范围提示
         resp.put("status", 0);
-        resp.put("deleted", related.size());
+        resp.put("deletedLogCount", deletedLogs);
+        resp.put("deletedBatchRelations", related.size());
         return resp;
     }
 
