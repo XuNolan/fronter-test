@@ -18,6 +18,8 @@ import project.xunolan.service.SessionKeyEnum;
 import javax.websocket.Session;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Feature 录制切面回调
@@ -50,6 +52,20 @@ public class FeatureRecordRuntimeHook implements RuntimeHook {
         
         // 预分配 record 表的 ID（创建一个临时记录）
         RecordRepository recordRepository = BeanUtils.getBean(RecordRepository.class);
+        
+        // 获取录制配置信息
+        ScreenRecorderService.RecordingRuntimeConfig config = getScreenRecorderService().loadRuntimeConfig();
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("format", config.format);
+        metadata.put("frameRate", config.frameRate);
+        metadata.put("quality", config.quality);
+        metadata.put("qualityPreset", config.qualityPreset);
+        metadata.put("storage", config.storage);
+        metadata.put("duration", 0);
+        metadata.put("file_size", 0);
+        metadata.put("file_name", "");
+        metadata.put("created_at", System.currentTimeMillis());
+        
         Record record = Record.builder()
                 .usecaseId(usecaseId)
                 .scriptId(scriptId)
@@ -58,7 +74,7 @@ public class FeatureRecordRuntimeHook implements RuntimeHook {
                 .storageType(getScreenRecorderService().getStorageType())
                 .recordConfigType(getRecordConfigType())
                 .executeTime(0)
-                .metadata("{}")
+                .metadata(JSON.toJSONString(metadata))
                 .build();
         
         record = recordRepository.save(record);
@@ -70,15 +86,10 @@ public class FeatureRecordRuntimeHook implements RuntimeHook {
         // 启动录制
         String recordFileName = null;
         try {
-            log.info("Attempting to start recording for scriptId: {}, usecaseId: {}", scriptId, usecaseId);
-
             recordFileName = getScreenRecorderService().startRecording(scriptId, usecaseId);
-
-            log.info("Recording started successfully, filename: {}", recordFileName);
             SessionKeyEnum.RECORD_FILE_NAME.set(session, recordFileName);
         } catch (Exception e) {
-            log.error("Failed to start recording for scriptId: {}, usecaseId: {}", scriptId, usecaseId, e);
-            log.error("Exception type: {}, message: {}", e.getClass().getName(), e.getMessage());
+            log.error("Failed to start recording", e);
             try {
                 if (getScreenRecorderService().isRecording()){
                     getScreenRecorderService().stopRecording();
@@ -124,6 +135,9 @@ public class FeatureRecordRuntimeHook implements RuntimeHook {
             int executeTime = recordStartTime != null ? 
                     (int) (System.currentTimeMillis() - recordStartTime) : 0;
             
+            // 获取录制配置信息
+            ScreenRecorderService.RecordingRuntimeConfig config = getScreenRecorderService().loadRuntimeConfig();
+            
             // 获取并更新 record 记录
             Record record = recordRepository.findById(recordId).orElse(null);
             if (record != null) {
@@ -147,11 +161,20 @@ public class FeatureRecordRuntimeHook implements RuntimeHook {
                 }
                 
                 // 更新元数据
-                String metadata = String.format("{\"duration\":%d,\"file_size\":%d,\"file_name\":\"%s\"}", 
-                        executeTime, 
-                        recordingFile != null ? recordingFile.length() : 0,
-                        recordingFile != null ? recordingFile.getName() : "");
-                record.setMetadata(metadata);
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("format", config.format);
+                metadata.put("frameRate", config.frameRate);
+                metadata.put("quality", config.quality);
+                metadata.put("qualityPreset", config.qualityPreset);
+                metadata.put("storage", config.storage);
+                metadata.put("duration", executeTime);
+                metadata.put("file_size", recordingFile != null ? recordingFile.length() : 0);
+                metadata.put("file_name", recordingFile != null ? recordingFile.getName() : "");
+                metadata.put("created_at", recordStartTime != null ? recordStartTime : System.currentTimeMillis());
+                metadata.put("file_extension", recordingFile != null ? getFileExtension(recordingFile.getName()) : "");
+                
+                record.setMetadata(JSON.toJSONString(metadata));
+                
                 
                 recordRepository.save(record);
                 
@@ -220,5 +243,19 @@ public class FeatureRecordRuntimeHook implements RuntimeHook {
             default:
                 return 1; // MEDIUM/BALANCE
         }
+    }
+    
+    /**
+     * 获取文件扩展名
+     */
+    private String getFileExtension(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return "";
+        }
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < fileName.length() - 1) {
+            return fileName.substring(lastDotIndex + 1).toLowerCase();
+        }
+        return "";
     }
 }

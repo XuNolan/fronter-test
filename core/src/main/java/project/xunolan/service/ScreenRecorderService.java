@@ -33,7 +33,7 @@ public class ScreenRecorderService {
     
     private ScreenRecorder screenRecorder;
     private File currentRecordingFile;
-    private final String recordingsDir = "target/recordings";
+    private final String recordingsDir = "recordings";
 
     private static final Path CONFIG_FILE_PATH = Paths.get("config", "recording-config.json");
 
