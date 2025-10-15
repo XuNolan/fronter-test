@@ -6,6 +6,7 @@ public enum SessionKeyEnum {
     SCRIPT_ID("scriptId"),
     USECASE_ID("usecaseId"),
     EXECUTE_GROUP_ID("executeGroupId"),
+    EXECUTE_TERM_ID("executeTermId"),
 
     RECORD_ID("recordId"),
     RECORD_FAIL("record_fail"),

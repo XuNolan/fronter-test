@@ -53,6 +53,23 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         SessionKeyEnum.EXECUTE_LOG_ID.set(session, logRow.getId());
         SessionKeyEnum.EXECUTE_START_TIME.set(session, System.currentTimeMillis());
 
+        // 若存在批量执行上下文，则写入 execute_group_log_related 关联
+        try {
+            String executeTermId = SessionKeyEnum.EXECUTE_TERM_ID.get(session);
+            if (executeTermId != null && !executeTermId.isEmpty() && executeGroupId != null && executeGroupId > 0) {
+                project.xunolan.database.repository.ExecuteGroupLogRelatedRepository relRepo = BeanUtils.getBean(project.xunolan.database.repository.ExecuteGroupLogRelatedRepository.class);
+                project.xunolan.database.entity.ExecuteGroupLogRelated rel = project.xunolan.database.entity.ExecuteGroupLogRelated.builder()
+                        .executeGroupId(executeGroupId)
+                        .executeTermId(executeTermId)
+                        .executeLogId(logRow.getId())
+                        .created(logRow.getCreated())
+                        .build();
+                relRepo.save(rel);
+            }
+        } catch (Exception e) {
+            log.warn("save execute_group_log_related failed: {}", e.getMessage());
+        }
+
         KarateFeatureInfo karateStepInfo = constructKarateFeatureInfo(fr);
         SocketPackage.sendToScenarioInfoQueue(new SocketPackage(session, JSON.toJSONString(new SendEntity(SendMsgType.KarateFeatureInfoMsg.getMsgType(), JSON.toJSONString(karateStepInfo)))));
         nowProcessScenarioIndex = -1;
