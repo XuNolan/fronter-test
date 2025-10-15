@@ -71,10 +71,17 @@ public class ExecuteGroupController {
             String term = e.getKey();
             List<ExecuteGroupLogRelated> list = e.getValue();
             int created = list.stream().map(ExecuteGroupLogRelated::getCreated).filter(Objects::nonNull).min(Integer::compareTo).orElse(0);
+
+            // 计算成功数（status == 0）
+            List<Long> logIds = list.stream().map(ExecuteGroupLogRelated::getExecuteLogId).collect(Collectors.toList());
+            List<ExecuteLog> logs = logIds.isEmpty() ? Collections.emptyList() : executeLogRepository.findAllById(logIds);
+            long successCount = logs.stream().filter(l -> l.getStatus() != null && l.getStatus() == 0).count();
+
             Map<String, Object> row = new HashMap<>();
             row.put("executeTermId", term);
             row.put("created", created);
             row.put("count", list.size());
+            row.put("successCount", successCount);
             result.add(row);
         }
         result.sort(Comparator.comparing(m -> (Integer)m.getOrDefault("created", 0)));
