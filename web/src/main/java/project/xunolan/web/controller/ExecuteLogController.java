@@ -201,20 +201,23 @@ public class ExecuteLogController {
                                       @RequestParam(value = "deleteLog", defaultValue = "true") Boolean deleteLog,
                                       @RequestBody(required = false) Map<String, Object> requestBody) {
         
-        // 优先从请求体获取参数，如果没有则使用 URL 参数
+        // 优先从请求体获取参数（若提供），否则使用 URL 参数的值；最后再落默认值
         if (requestBody != null) {
-            executeLogId = executeLogId != null ? executeLogId : 
-                (requestBody.get("executeLogId") != null ? Long.valueOf(requestBody.get("executeLogId").toString()) : null);
-            deleteRecord = deleteRecord != null ? deleteRecord : 
-                (requestBody.get("deleteRecord") != null ? Boolean.valueOf(requestBody.get("deleteRecord").toString()) : false);
-            deleteLog = deleteLog != null ? deleteLog : 
-                (requestBody.get("deleteLog") != null ? Boolean.valueOf(requestBody.get("deleteLog").toString()) : true);
+            if (executeLogId == null && requestBody.get("executeLogId") != null) {
+                executeLogId = Long.valueOf(requestBody.get("executeLogId").toString());
+            }
+            if (requestBody.containsKey("deleteRecord")) {
+                deleteRecord = Boolean.valueOf(String.valueOf(requestBody.get("deleteRecord")));
+            }
+            if (requestBody.containsKey("deleteLog")) {
+                deleteLog = Boolean.valueOf(String.valueOf(requestBody.get("deleteLog")));
+            }
         }
-        
-        if (executeLogId == null) {
+       
+        if (executeLogId == null || deleteRecord == null || deleteLog == null) {
             Map<String, Object> errorResp = new HashMap<>();
             errorResp.put("status", 1);
-            errorResp.put("msg", "executeLogId 参数不能为空");
+            errorResp.put("msg", "executeLogId、deleteRecord 和 deleteLog 参数不能为空");
             return errorResp;
         }
         
