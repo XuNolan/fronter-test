@@ -14,6 +14,7 @@ import project.xunolan.database.repository.ExecuteGroupScriptRelatedRepository;
 import project.xunolan.database.repository.ExecuteGroupLogRelatedRepository;
 import project.xunolan.database.repository.ExecuteLogRepository;
 import project.xunolan.database.repository.ExecuteLogRecordRelatedRepository;
+import project.xunolan.database.repository.RecordRepository;
 import project.xunolan.database.entity.ExecuteGroupLogRelated;
 import project.xunolan.database.entity.ExecuteLog;
 import project.xunolan.database.entity.ExecuteLogRecordRelated;
@@ -58,6 +59,9 @@ public class ExecuteGroupController {
 
     @Autowired
     private project.xunolan.database.repository.ScriptRepository scriptRepository;
+
+    @Autowired
+    private RecordRepository recordRepository;
 
     /**
      * 执行组批次列表（按 execute_term_id 聚合）
@@ -125,6 +129,23 @@ public class ExecuteGroupController {
         for (Long id : logIds) {
             executeLogRecordRelatedRepository.findByExecuteLogId(id).ifPresent(rel -> logIdToRecord.put(id, rel));
         }
+
+        // 载入执行组脚本顺序映射 scriptId -> index
+        List<ExecuteGroupScriptRelated> scriptRels = executeGroupScriptRelatedRepository.findByExecuteGroupIdOrderByIndexAsc(groupId);
+        Map<Long, Long> scriptIdToIndex = new HashMap<>();
+        for (ExecuteGroupScriptRelated sr : scriptRels) {
+            scriptIdToIndex.put(sr.getScriptId(), sr.getIndex());
+        }
+
+        // 载入脚本名称映射 scriptId -> name
+        Set<Long> scriptIds = logs.stream().map(ExecuteLog::getScriptId).collect(Collectors.toSet());
+        List<Script> scripts = scriptIds.isEmpty() ? Collections.emptyList() : scriptRepository.findAllById(scriptIds);
+        Map<Long, String> scriptIdToName = new HashMap<>();
+        for (Script s : scripts) {
+            scriptIdToName.put(s.getId(), s.getName());
+        }
+
+        // 构建行并按执行顺序排序
         List<Map<String, Object>> rows = new ArrayList<>();
         for (ExecuteLog log : logs) {
             Map<String, Object> row = new HashMap<>();
@@ -132,6 +153,12 @@ public class ExecuteGroupController {
             row.put("created", log.getCreated());
             row.put("status", log.getStatus());
             row.put("statusText", getStatusText(log.getStatus()));
+            row.put("scriptId", log.getScriptId());
+            row.put("scriptName", scriptIdToName.getOrDefault(log.getScriptId(), ""));
+            // 执行顺序索引，默认较大值以避免null
+            long orderIdx = scriptIdToIndex.getOrDefault(log.getScriptId(), Long.MAX_VALUE);
+            row.put("orderIndex", orderIdx);
+
             ExecuteLogRecordRelated rel = logIdToRecord.get(log.getId());
             if (rel != null) {
                 row.put("hasRecord", true);
@@ -141,6 +168,15 @@ public class ExecuteGroupController {
             }
             rows.add(row);
         }
+        rows.sort((a, b) -> {
+            Long ai = (Long) a.get("orderIndex");
+            Long bi = (Long) b.get("orderIndex");
+            int c = Long.compare(ai != null ? ai : Long.MAX_VALUE, bi != null ? bi : Long.MAX_VALUE);
+            if (c != 0) return c;
+            Integer ac = (Integer) a.get("created");
+            Integer bc = (Integer) b.get("created");
+            return Integer.compare(ac != null ? ac : 0, bc != null ? bc : 0);
+        });
         Map<String, Object> resp = new HashMap<>();
         resp.put("items", rows);
         return resp;
