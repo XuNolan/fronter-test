@@ -172,6 +172,23 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         } catch (Exception e) {
             log.error("save execute_log failed", e);
         } finally {
+            // 通知前端本次脚本执行结束，便于批量编排推进
+            try {
+                Long scriptId = SessionKeyEnum.SCRIPT_ID.get(session);
+                Long usecaseId = SessionKeyEnum.USECASE_ID.get(session);
+                Long executeGroupId = SessionKeyEnum.EXECUTE_GROUP_ID.getOrDefault(session, 0L);
+                java.util.Map<String, Object> endPayload = new java.util.HashMap<>();
+                endPayload.put("type", "feature_end");
+                endPayload.put("executeLogId", executeLogId);
+                endPayload.put("scriptId", scriptId);
+                endPayload.put("usecaseId", usecaseId);
+                endPayload.put("executeGroupId", executeGroupId);
+                endPayload.put("status", status);
+                endPayload.put("endedAt", System.currentTimeMillis());
+                SocketPackage.sendToExecuteLogQueue(new SocketPackage(session, JSON.toJSONString(new SendEntity(SendMsgType.ExecuteInfoMsg.getMsgType(), JSON.toJSONString(endPayload)))));
+            } catch (Exception ex) {
+                log.warn("notify feature_end failed: {}", ex.getMessage());
+            }
             SessionKeyEnum.ACC_EXECUTE_LOG.remove(session);
             SessionKeyEnum.FEATURE_STATUS.remove(session);
         }
