@@ -132,7 +132,14 @@ public class ExecuteLogController {
         ExecuteLog executeLog = executeLogRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("执行日志不存在"));
 
-        Map<String, Object> result = Convert4Amis.flatSingleMapWithPrefix("", executeLog);
+        // 直接构建结果，避免 Convert4Amis 的字段前缀问题
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", executeLog.getId());
+        result.put("scriptId", executeLog.getScriptId());
+        result.put("logData", executeLog.getLogData());
+        result.put("status", executeLog.getStatus());
+        result.put("executeTime", executeLog.getExecuteTime());
+        result.put("created", executeLog.getCreated());
         result.put("statusText", getStatusText(executeLog.getStatus()));
 
         // 查找关联的录制记录
@@ -142,9 +149,12 @@ public class ExecuteLogController {
         if (relation != null) {
             Record record = recordRepository.findById(relation.getRecordId()).orElse(null);
             if (record != null) {
-                Map<String, Object> recordData = Convert4Amis.flatSingleMapWithPrefix("record_", record);
-                result.putAll(recordData);
                 result.put("hasRecord", true);
+                result.put("recordId", record.getId());
+                result.put("recordStatus", record.getStatus());
+                result.put("recordStatusText", getStatusText(record.getStatus()));
+                result.put("recordStorageType", record.getStorageType());
+                result.put("recordUrl", record.getRecordUrl());
             } else {
                 result.put("hasRecord", false);
             }
