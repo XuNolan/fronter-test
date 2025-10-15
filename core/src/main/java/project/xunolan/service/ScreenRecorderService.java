@@ -63,17 +63,39 @@ public class ScreenRecorderService {
         
         try {
             // 获取屏幕尺寸
-            GraphicsConfiguration gc = GraphicsEnvironment
-                    .getLocalGraphicsEnvironment()
-                    .getDefaultScreenDevice()
-                    .getDefaultConfiguration();
+            log.info("Getting graphics environment...");
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            log.info("GraphicsEnvironment: {}", ge);
+            log.info("GraphicsEnvironment class: {}", ge.getClass().getName());
+            
+            GraphicsDevice[] devices = ge.getScreenDevices();
+            log.info("Available screen devices count: {}", devices.length);
+            for (int i = 0; i < devices.length; i++) {
+                GraphicsDevice device = devices[i];
+                log.info("Screen device [{}]: ID={}, Type={}, Configs={}", 
+                    i, device.getIDstring(), device.getType(), device.getConfigurations().length);
+            }
+            
+            GraphicsDevice defaultDevice = ge.getDefaultScreenDevice();
+            log.info("Default screen device: {}", defaultDevice);
+            if (defaultDevice == null) {
+                throw new Exception("Default screen device is null - no screen available");
+            }
+            log.info("Default device ID: {}, Type: {}", defaultDevice.getIDstring(), defaultDevice.getType());
+            
+            GraphicsConfiguration gc = defaultDevice.getDefaultConfiguration();
+            log.info("Default graphics configuration: {}", gc);
+            if (gc == null) {
+                throw new Exception("Default graphics configuration is null");
+            }
+            log.info("Screen bounds: {}", gc.getBounds());
             
             // 配置录制参数（根据配置映射）
             Format fileFormat = createFileFormat(runtimeConfig.format);
             Format screenFormat = createScreenFormat(runtimeConfig);
             Format mouseFormat = createMouseFormat();
             Format audioFormat = createAudioFormat(runtimeConfig);
-            
+
             screenRecorder = new CustomScreenRecorder(
                     gc,
                     gc.getBounds(),
@@ -82,16 +104,18 @@ public class ScreenRecorderService {
                     mouseFormat,
                     audioFormat,
                     new File(recordingsDir),
-                    fileName + selectExtension(runtimeConfig.format)
+                    fileName
             );
-            
+
             screenRecorder.start();
             
-            log.info("Started screen recording: {}/{}", recordingsDir, fileName + selectExtension(runtimeConfig.format));
-            return fileName + selectExtension(runtimeConfig.format);
+            String finalFileName = fileName + selectExtension(runtimeConfig.format);
+            log.info("Started screen recording: {}/{}", recordingsDir, finalFileName);
+            return finalFileName;
             
         } catch (Exception e) {
             log.error("Failed to start screen recording", e);
+            log.error("Exception type: {}, message: {}", e.getClass().getName(), e.getMessage());
             throw new Exception("Failed to start screen recording: " + e.getMessage(), e);
         }
     }

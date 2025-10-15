@@ -70,10 +70,15 @@ public class FeatureRecordRuntimeHook implements RuntimeHook {
         // 启动录制
         String recordFileName = null;
         try {
+            log.info("Attempting to start recording for scriptId: {}, usecaseId: {}", scriptId, usecaseId);
+
             recordFileName = getScreenRecorderService().startRecording(scriptId, usecaseId);
+
+            log.info("Recording started successfully, filename: {}", recordFileName);
             SessionKeyEnum.RECORD_FILE_NAME.set(session, recordFileName);
         } catch (Exception e) {
-            log.error("Failed to start recording", e);
+            log.error("Failed to start recording for scriptId: {}, usecaseId: {}", scriptId, usecaseId, e);
+            log.error("Exception type: {}, message: {}", e.getClass().getName(), e.getMessage());
             try {
                 if (getScreenRecorderService().isRecording()){
                     getScreenRecorderService().stopRecording();
