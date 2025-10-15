@@ -13,14 +13,21 @@ import project.xunolan.database.repository.RecordRepository;
 import project.xunolan.database.repository.ExecuteGroupIdRepository;
 import project.xunolan.web.amisEntity.aspect.AmisResult;
 import project.xunolan.service.ScriptService;
+import project.xunolan.service.VideoConversionService;
 import project.xunolan.database.entity.Script;
 import project.xunolan.web.amisEntity.entity.AmisCrudListVo;
 import project.xunolan.web.amisEntity.utils.Convert4Amis;
+import com.alibaba.fastjson.JSON;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import java.nio.file.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -41,6 +48,9 @@ public class ExecuteLogController {
 
     @Autowired
     private ExecuteGroupIdRepository executeGroupIdRepository;
+    
+    @Autowired
+    private VideoConversionService videoConversionService;
 
     /**
      * 查询指定脚本的执行日志列表（带录制信息）
@@ -280,6 +290,300 @@ public class ExecuteLogController {
             default:
                 return "未知";
         }
+    }
+
+    /**
+     * 获取执行日志对应的录制视频文件
+     * @param executeLogId 执行日志ID
+     * @return 视频文件的二进制数据
+     */
+    @GetMapping("/video/{executeLogId}")
+    public ResponseEntity<byte[]> getRecordingVideo(@PathVariable("executeLogId") Long executeLogId) {
+        try {
+            log.info("开始获取执行日志 {} 的录制视频", executeLogId);
+            
+            // 1. 通过 executeLogId 查找关联的 recordId
+            ExecuteLogRecordRelated relation = executeLogRecordRelatedRepository
+                    .findByExecuteLogId(executeLogId)
+                    .orElseThrow(() -> {
+                        log.error("执行日志 {} 没有关联的录制记录", executeLogId);
+                        return new RuntimeException("该执行日志没有关联的录制记录");
+                    });
+
+            log.info("找到关联记录: executeLogId={}, recordId={}", executeLogId, relation.getRecordId());
+
+            // 2. 通过 recordId 查找录制记录
+            Record record = recordRepository.findById(relation.getRecordId())
+                    .orElseThrow(() -> {
+                        log.error("录制记录 {} 不存在", relation.getRecordId());
+                        return new RuntimeException("录制记录不存在");
+                    });
+
+            log.info("找到录制记录: recordId={}, storageType={}, recordUrl={}", 
+                    record.getId(), record.getStorageType(), record.getRecordUrl());
+
+            // 3. 检查是否有转换后的WebM文件，如果没有则按需转换
+            String webmPath = null;
+            Map<String, Object> metadata = parseMetadata(record.getMetadata());
+            if (metadata != null && Boolean.TRUE.equals(metadata.get("has_webm_conversion"))) {
+                webmPath = (String) metadata.get("converted_webm_path");
+                if (webmPath != null && Files.exists(Paths.get(webmPath))) {
+                    log.info("找到转换后的WebM文件: {}", webmPath);
+                } else {
+                    webmPath = null;
+                }
+            }
+            
+            // 如果没有WebM文件，尝试按需转换
+            if (webmPath == null && "local".equalsIgnoreCase(record.getStorageType())) {
+                String aviPath = record.getRecordUrl();
+                if (aviPath != null && aviPath.toLowerCase().endsWith(".avi")) {
+                    log.info("尝试按需转换AVI文件: {}", aviPath);
+                    webmPath = videoConversionService.convertOnDemand(aviPath);
+                    if (webmPath != null) {
+                        log.info("按需转换成功: {}", webmPath);
+                    } else {
+                        log.warn("按需转换失败，将使用原始AVI文件");
+                    }
+                }
+            }
+            
+            // 4. 根据存储类型获取视频数据
+            byte[] videoData;
+            String contentType = "video/x-msvideo"; // 默认为 AVI 格式
+            
+            if ("database".equalsIgnoreCase(record.getStorageType()) || "db".equalsIgnoreCase(record.getStorageType())) {
+                // 从数据库获取
+                videoData = record.getRecordData();
+                if (videoData == null || videoData.length == 0) {
+                    log.error("录制数据为空，recordId={}", record.getId());
+                    throw new RuntimeException("录制数据为空");
+                }
+                log.info("从数据库加载录制视频，大小: {} bytes", videoData.length);
+            } else if ("local".equalsIgnoreCase(record.getStorageType())) {
+                // 从本地文件系统获取
+                Path path;
+                
+                // 优先使用转换后的文件（WebM或MP4）
+                if (webmPath != null) {
+                    path = Paths.get(webmPath);
+                    if (webmPath.toLowerCase().endsWith(".mp4")) {
+                        contentType = "video/mp4";
+                        log.info("使用转换后的MP4文件: {}", webmPath);
+                    } else {
+                        contentType = "video/webm";
+                        log.info("使用转换后的WebM文件: {}", webmPath);
+                    }
+                } else {
+                    // 使用原始文件
+                    String filePath = record.getRecordUrl();
+                    if (filePath == null || filePath.isEmpty()) {
+                        log.error("录制文件路径为空，recordId={}", record.getId());
+                        throw new RuntimeException("录制文件路径为空");
+                    }
+                    
+                    log.info("尝试读取原始文件: {}", filePath);
+                    path = Paths.get(filePath);
+                    if (!Files.exists(path)) {
+                        log.error("录制文件不存在: {}", filePath);
+                        // 尝试新的recordings目录
+                        Path recordingsPath = Paths.get("recordings", path.getFileName().toString());
+                        if (Files.exists(recordingsPath)) {
+                            log.info("找到recordings目录文件: {}", recordingsPath);
+                            path = recordingsPath;
+                        } else {
+                            // 尝试旧的target/recordings目录（向后兼容）
+                            Path oldPath = Paths.get("target/recordings", path.getFileName().toString());
+                            if (Files.exists(oldPath)) {
+                                log.info("找到旧的target/recordings目录文件: {}", oldPath);
+                                path = oldPath;
+                            } else {
+                                throw new RuntimeException("录制文件不存在: " + filePath);
+                            }
+                        }
+                    }
+                }
+                
+                videoData = Files.readAllBytes(path);
+                log.info("从本地文件加载录制视频: {}, 大小: {} bytes", path, videoData.length);
+                
+                // 根据文件扩展名设置正确的 Content-Type
+                String fileName = path.getFileName().toString().toLowerCase();
+                if (fileName.endsWith(".mp4")) {
+                    contentType = "video/mp4";
+                } else if (fileName.endsWith(".webm")) {
+                    contentType = "video/webm";
+                } else if (fileName.endsWith(".avi")) {
+                    contentType = "video/x-msvideo";
+                }
+            } else {
+                log.error("不支持的存储类型: {}, recordId={}", record.getStorageType(), record.getId());
+                throw new RuntimeException("不支持的存储类型: " + record.getStorageType());
+            }
+
+            // 4. 返回视频数据
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(contentType));
+            headers.setContentLength(videoData.length);
+            headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
+            headers.setCacheControl("no-cache, no-store, must-revalidate");
+            // 添加CORS头
+            headers.set(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+            headers.set(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, OPTIONS");
+            headers.set(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Authorization");
+            
+            return new ResponseEntity<>(videoData, headers, HttpStatus.OK);
+            
+        } catch (IOException e) {
+            log.error("读取录制文件失败", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(("读取录制文件失败: " + e.getMessage()).getBytes());
+        } catch (RuntimeException e) {
+            log.error("获取录制视频失败", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body((e.getMessage()).getBytes());
+        }
+    }
+
+    /**
+     * 按需转换视频API
+     */
+    @PostMapping("/convert/{executeLogId}")
+    public ResponseEntity<Map<String, Object>> convertVideo(@PathVariable("executeLogId") Long executeLogId) {
+        try {
+            log.info("开始按需转换执行日志 {} 的录制视频", executeLogId);
+            
+            // 1. 通过 executeLogId 查找关联的 recordId
+            ExecuteLogRecordRelated relation = executeLogRecordRelatedRepository
+                    .findByExecuteLogId(executeLogId)
+                    .orElseThrow(() -> {
+                        log.error("执行日志 {} 没有关联的录制记录", executeLogId);
+                        return new RuntimeException("该执行日志没有关联的录制记录");
+                    });
+
+            // 2. 通过 recordId 查找录制记录
+            Record record = recordRepository.findById(relation.getRecordId())
+                    .orElseThrow(() -> {
+                        log.error("录制记录 {} 不存在", relation.getRecordId());
+                        return new RuntimeException("录制记录不存在");
+                    });
+
+            // 3. 检查是否为本地存储的AVI文件
+            if (!"local".equalsIgnoreCase(record.getStorageType())) {
+                return ResponseEntity.ok(Map.of(
+                    "success", false,
+                    "message", "只有本地存储的AVI文件才能转换"
+                ));
+            }
+
+            String aviPath = record.getRecordUrl();
+            if (aviPath == null || !aviPath.toLowerCase().endsWith(".avi")) {
+                return ResponseEntity.ok(Map.of(
+                    "success", false,
+                    "message", "不是AVI格式文件"
+                ));
+            }
+
+            // 4. 执行按需转换
+            String webmPath = videoConversionService.convertOnDemand(aviPath);
+            
+            if (webmPath != null) {
+                // 更新元数据
+                Map<String, Object> metadata = parseMetadata(record.getMetadata());
+                if (metadata == null) {
+                    metadata = new HashMap<>();
+                }
+                metadata.put("converted_webm_path", webmPath);
+                metadata.put("has_webm_conversion", true);
+                record.setMetadata(JSON.toJSONString(metadata));
+                recordRepository.save(record);
+                
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "转换成功",
+                    "webmPath", webmPath,
+                    "originalPath", aviPath
+                ));
+            } else {
+                return ResponseEntity.ok(Map.of(
+                    "success", false,
+                    "message", "转换失败，请检查FFmpeg是否安装"
+                ));
+            }
+
+        } catch (Exception e) {
+            log.error("按需转换失败", e);
+            return ResponseEntity.ok(Map.of(
+                "success", false,
+                "message", "转换失败: " + e.getMessage()
+            ));
+        }
+    }
+    
+    /**
+     * 解析元数据JSON字符串
+     */
+    private Map<String, Object> parseMetadata(String metadataJson) {
+        try {
+            if (metadataJson == null || metadataJson.trim().isEmpty()) {
+                return new HashMap<>();
+            }
+            return JSON.parseObject(metadataJson, Map.class);
+        } catch (Exception e) {
+            log.warn("解析元数据失败: {}", e.getMessage());
+            return new HashMap<>();
+        }
+    }
+    
+    /**
+     * 从元数据中获取字符串值
+     */
+    private String getStringFromMetadata(Map<String, Object> metadata, String key, String defaultValue) {
+        if (metadata == null || !metadata.containsKey(key)) {
+            return defaultValue;
+        }
+        Object value = metadata.get(key);
+        return value != null ? value.toString() : defaultValue;
+    }
+    
+    /**
+     * 根据格式和文件扩展名获取Content-Type
+     */
+    private String getContentTypeByFormat(String format, String fileExtension) {
+        // 优先使用文件扩展名
+        if (fileExtension != null && !fileExtension.isEmpty()) {
+            switch (fileExtension.toLowerCase()) {
+                case "mp4":
+                    return "video/mp4";
+                case "webm":
+                    return "video/webm";
+                case "avi":
+                    return "video/x-msvideo";
+                case "mov":
+                    return "video/quicktime";
+                default:
+                    break;
+            }
+        }
+        
+        // 如果文件扩展名不可用，使用格式信息
+        if (format != null) {
+            switch (format.toLowerCase()) {
+                case "mp4":
+                    return "video/mp4";
+                case "webm":
+                    return "video/webm";
+                case "avi":
+                    return "video/x-msvideo";
+                case "mov":
+                    return "video/quicktime";
+                default:
+                    break;
+            }
+        }
+        
+        // 默认返回AVI格式
+        return "video/x-msvideo";
     }
 }
 
