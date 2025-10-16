@@ -20,6 +20,7 @@ public class UsecaseDisplayListVo {
     private String usecaseDescription;
     private String scriptName;
     private String scriptDescription;
+    private String scriptId;  // 添加脚本ID字段
     private String lastExecuteTime;
     private int status;
 

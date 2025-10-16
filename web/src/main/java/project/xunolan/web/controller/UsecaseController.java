@@ -77,6 +77,7 @@ public class UsecaseController {
                     .usecaseDescription(usecase.getDescription())
                     .scriptName(activeScript == null? null:activeScript.getName())
                     .scriptDescription(activeScript == null? null:activeScript.getDescription())
+                    .scriptId(activeScript == null? null:String.valueOf(activeScript.getId()))
                     .version(activeScript == null? null:activeScript.getVersion())
                     .lastExecuteTime(String.valueOf(executeLog == null? null: executeLog.getExecuteTime()))
                     .status(executeLog == null? 0 : executeLog.getStatus()).build());
