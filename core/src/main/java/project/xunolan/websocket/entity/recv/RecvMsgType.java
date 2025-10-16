@@ -5,12 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import project.xunolan.websocket.entity.recv.impl.ProcessScriptStart;
+import project.xunolan.websocket.entity.recv.impl.ProcessHumanInputResponse;
 
 @ToString
 @Getter
 @AllArgsConstructor
 public enum RecvMsgType {
     script_start(ProcessScriptStart.class, "script_start"),
+    human_input_response(ProcessHumanInputResponse.class, "human_input_response"),
     ;
 
     final Class<? extends RecvMsgBase> classProto;

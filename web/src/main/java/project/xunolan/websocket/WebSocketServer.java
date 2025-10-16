@@ -24,8 +24,9 @@ public class WebSocketServer {
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        log.info("message received: {}", message);
-        OnRecv(session, message);
+        log.info("[Thread: {}] message received: {}", Thread.currentThread().getName(), message);
+        // 异步处理消息，避免阻塞 WebSocket 线程
+        java.util.concurrent.CompletableFuture.runAsync(() -> OnRecv(session, message));
     }
 
     @OnError
@@ -40,9 +41,11 @@ public class WebSocketServer {
 
     public static void OnRecv(Session session, String message) {
         RecvEntity recvEntity = JSON.parseObject(message, RecvEntity.class);
+        log.info("OnRecv - msgType: {}, content: {}", recvEntity.getMsgType(), recvEntity.getContent());
         if(recvEntity.getMsgType().equals("heartbeat")) return;
         RecvMsgBase recvMsgBase = RecvMsgType.parseRawContent(recvEntity.getContent(), recvEntity.getMsgType());
         if(recvMsgBase != null) {
+            log.info("Processing message with type: {}", recvEntity.getMsgType());
             recvMsgBase.processMsg(session);
         }else {
             log.error("recv empty or unknown msg type, message {}, parse result:{}", message, recvEntity);

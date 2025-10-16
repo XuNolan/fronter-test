@@ -21,6 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static project.xunolan.karate.service.HumanInputService.preprocessHumanInput;
+
 @Slf4j
 @Service
 public class FeatureStartService {
@@ -34,6 +36,9 @@ public class FeatureStartService {
     private Feature resolveScript(Script script) {
         // 预处理脚本数据：删除空行和注释行
         String processedScriptData = preprocessScriptData(script.getData());
+        
+        // 转换人机输入扩展词法为标准 Karate 调用
+        processedScriptData = preprocessHumanInput(processedScriptData);
         
         if(useResource){
             return resolveByResource(script, processedScriptData);
