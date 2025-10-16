@@ -91,10 +91,17 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
 
     @Override
     public void afterStep(StepResult stepResult, ScenarioRuntime sr) {
+        
         ExecuteResultInfo executeResultInfo = ExecuteResultInfo.fromResult(nowProcessScenarioIndex, nowProcessStepIndex, stepResult);
         Session session = FeatureStartService.currentlyUseSession.get();
-        // 向前端实时推送（保持不变）
-        SocketPackage.sendToExecuteLogQueue(new SocketPackage(session, JSON.toJSONString(new SendEntity(SendMsgType.ExecuteInfoMsg.getMsgType(), JSON.toJSONString(executeResultInfo)))));
+        
+        // 获取Step的原始索引和当前Hook使用的索引
+        int stepOriginalIndex = stepResult.getStep().getIndex();
+        log.info("Step Index - Original: {}, Hook nowProcessStepIndex: {}, scenarioIndex: {}", 
+                stepOriginalIndex, nowProcessStepIndex, nowProcessScenarioIndex);
+        
+        // 不再仅推送 ExecuteResultInfo，改为推送与落库一致的 stepLogEntry 结构，确保前端实时与详情页一致
+        // 注意：stepLogEntry 在下方构造完成后再发送
 
         // 构造更丰富的 step 日志条目：包含原始脚本、索引、以及 fromResult 序列化后的完整明细
         String rawStep = stepResult.getStep().getPrefix() + " " + stepResult.getStep().getText();
@@ -104,6 +111,13 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         stepLogEntry.put("stepString", rawStep);
         // 详细执行信息（包含开始/结束时间、耗时、是否成功、错误信息、可能的日志等，由 fromResult 提供）
         stepLogEntry.put("detail", executeResultInfo);
+
+        // 向前端实时推送与落库一致的结构
+        SocketPackage.sendToExecuteLogQueue(new SocketPackage(session,
+                JSON.toJSONString(new SendEntity(
+                        SendMsgType.ExecuteInfoMsg.getMsgType(),
+                        JSON.toJSONString(stepLogEntry)
+                ))));
 
         // 追加到 session 缓存（JSON 数组字符串）
         String existed = SessionKeyEnum.ACC_EXECUTE_LOG.get(session);
@@ -144,7 +158,23 @@ public class StepResultDisplayRuntimeHook implements RuntimeHook {
         while(scenarioRuntimeIterator.hasNext()){
             ScenarioRuntime scenarioRuntime = scenarioRuntimeIterator.next();
             List<StepInfo> stepInfos = new ArrayList<>();
-            scenarioRuntime.scenario.getSteps().forEach(step -> stepInfos.add(new StepInfo(step.getIndex(), step.getPrefix() + " " + step.getText())));
+            // 使用手动计数的索引，而不是 step.getIndex()，确保索引从0开始连续
+            int stepCounter = 0;
+            
+            // 首先添加 Background 步骤（如果存在）
+            if (scenarioRuntime.scenario.getFeature().getBackground() != null) {
+                for (Step step : scenarioRuntime.scenario.getFeature().getBackground().getSteps()) {
+                    stepInfos.add(new StepInfo(stepCounter, step.getPrefix() + " " + step.getText()));
+                    stepCounter++;
+                }
+            }
+            
+            // 然后添加 Scenario 的步骤
+            for (Step step : scenarioRuntime.scenario.getSteps()) {
+                stepInfos.add(new StepInfo(stepCounter, step.getPrefix() + " " + step.getText()));
+                stepCounter++;
+            }
+            
             ScenarioInfo scenarioInfo = ScenarioInfo.builder()
                     .index(scenarioNum)
                     .scenarioName(scenarioRuntime.scenario.getName())
