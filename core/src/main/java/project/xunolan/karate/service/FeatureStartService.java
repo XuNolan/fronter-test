@@ -5,15 +5,12 @@ import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
 import com.intuit.karate.RuntimeHook;
 import com.intuit.karate.resource.MemoryResource;
-import com.intuit.karate.resource.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import project.xunolan.database.entity.Script;
 import project.xunolan.karate.adapter.ResourceAdapter;
 import project.xunolan.karate.service.hooks.HookService;
-import project.xunolan.karate.service.hooks.hookImpl.FeatureRecordRuntimeHook;
-import project.xunolan.service.ScreenRecorderService;
 
 import javax.websocket.Session;
 import java.io.ByteArrayInputStream;
@@ -22,7 +19,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Slf4j
@@ -36,14 +32,41 @@ public class FeatureStartService {
     private static boolean useResource = false;
 
     private Feature resolveScript(Script script) {
+        // 预处理脚本数据：删除空行和注释行
+        String processedScriptData = preprocessScriptData(script.getData());
+        
         if(useResource){
-            return resolveByResource(script);
+            return resolveByResource(script, processedScriptData);
         } else {
-            return resolveByTempFile(script);
+            return resolveByTempFile(script, processedScriptData);
         }
     }
+    
+    /**
+     * 预处理脚本数据：删除空行和以#开头的注释行
+     * @param scriptData 原始脚本数据
+     * @return 处理后的脚本数据
+     */
+    private String preprocessScriptData(String scriptData) {
+        if (scriptData == null || scriptData.isEmpty()) {
+            return scriptData;
+        }
+        
+        StringBuilder processed = new StringBuilder();
+        String[] lines = scriptData.split("\n");
+        
+        for (String line : lines) {
+            String trimmedLine = line.trim();
+            // 保留非空行且不以#开头的行
+            if (!trimmedLine.isEmpty() && !trimmedLine.startsWith("#")) {
+                processed.append(line).append("\n");
+            }
+        }
+        
+        return processed.toString();
+    }
 
-    private Feature resolveByTempFile(Script script){
+    private Feature resolveByTempFile(Script script, String processedScriptData){
         String resourcePath = "src/main/resources/tmp";
         File tmpDirectory = new File(resourcePath);
         // 确保 tmp 目录存在，如果不存在则创建
@@ -53,9 +76,8 @@ public class FeatureStartService {
         try {
             // 在 tmp 目录下创建一个临时文件
             Path tmpFilePath =  Files.createTempFile(tmpDirectory.toPath(), script.getUsecaseId() + "-" + script.getId(), ".feature");
-            String scriptData = script.getData();
             File file = tmpFilePath.toFile();
-            MemoryResource memoryResource = new MemoryResource(file, scriptData);
+            MemoryResource memoryResource = new MemoryResource(file, processedScriptData);
             if(!file.delete()){
                 log.error("Failed to delete file {}", file.getAbsolutePath());
             }
@@ -66,9 +88,8 @@ public class FeatureStartService {
         }
     }
 
-    private Feature resolveByResource(Script script){
-        String scriptData = script.getData();
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(scriptData.getBytes(StandardCharsets.UTF_8));
+    private Feature resolveByResource(Script script, String processedScriptData){
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(processedScriptData.getBytes(StandardCharsets.UTF_8));
         return Feature.read(new ResourceAdapter(byteArrayInputStream));
     }
 
@@ -104,7 +125,8 @@ public class FeatureStartService {
             hooks = hookService.getCommonHooks();
         }
 
-        Runner.Builder customizeBuilder = Runner.builder().hooks(hooks) //保留配置hook
+        @SuppressWarnings("unchecked")
+        Runner.Builder<?> customizeBuilder = Runner.builder().hooks(hooks) //保留配置hook
                 //显式设置单线程（确保 ThreadLocal 有效）
                 .threads(1)
                 //禁用所有报告功能。当前仅考虑性能？之后如果有生成报告需求的话可能要移出。
